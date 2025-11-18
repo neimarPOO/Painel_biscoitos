@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Controle: Startup de Natal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        body { font-family: 'Nunito', sans-serif; background-color: #f3f4f6; }
+        .tab-active { border-bottom: 3px solid #16a34a; color: #16a34a; font-weight: 700; }
+        .tab-inactive { color: #6b7280; }
+        .timeline-line { position: absolute; left: 24px; top: 0; bottom: 0; width: 2px; background-color: #e5e7eb; z-index: 0; }
+        
+        /* Custom Inputs */
+        .input-group { position: relative; }
+        .input-label { font-size: 0.75rem; color: #6b7280; font-weight: 600; margin-bottom: 0.25rem; display: block; }
+        
+        /* Modal Overlay */
+        #task-modal { background-color: rgba(0, 0, 0, 0.5); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-green-600 text-white p-2 rounded-lg">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800 leading-tight">Gestão da Startup</h1>
+                    <p class="text-xs text-gray-500">Escola Startup | Edição Natal</p>
+                </div>
+            </div>
+            <div class="text-right hidden sm:block">
+                <div class="text-xs text-gray-400 uppercase font-bold">Data Limite</div>
+                <div class="text-sm font-bold text-green-700">01/Dez (Produção)</div>
+            </div>
+        </div>
+        <!-- Tabs -->
+        <div class="max-w-5xl mx-auto px-4 flex gap-8 mt-2 border-t pt-2">
+            <button onclick="switchTab('cronograma')" id="btn-cronograma" class="pb-3 px-2 tab-active transition-all">
+                <i class="fa-solid fa-list-check mr-2"></i>Cronograma & Tarefas
+            </button>
+            <button onclick="switchTab('custos')" id="btn-custos" class="pb-3 px-2 tab-inactive transition-all">
+                <i class="fa-solid fa-calculator mr-2"></i>Calculadora de Preços
+            </button>
+        </div>
+    </header>
+
+    <!-- Content Area -->
+    <main class="flex-1 max-w-5xl mx-auto w-full p-4 mb-12 relative">
+
+        <!-- TAB: CRONOGRAMA / TAREFAS -->
+        <div id="tab-cronograma" class="block">
+            
+            <!-- Team Management Section -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
+                <h3 class="font-bold text-gray-700 mb-3 flex items-center">
+                    <i class="fa-solid fa-users mr-2 text-green-600"></i> Equipe da Startup
+                </h3>
+                <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center mb-4">
+                    <input type="text" id="new-member-name" class="border border-gray-300 rounded-lg p-2 text-sm w-full sm:w-64 focus:ring-2 focus:ring-green-500 outline-none" placeholder="Nome do integrante...">
+                    <button onclick="addMember()" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition-colors w-full sm:w-auto">
+                        <i class="fa-solid fa-plus mr-1"></i> Adicionar Sócio
+                    </button>
+                </div>
+                <div id="team-list" class="flex flex-wrap gap-2">
+                    <!-- Members injected here -->
+                    <p class="text-sm text-gray-400 italic" id="no-members-msg">Adicione os integrantes para delegar tarefas.</p>
+                </div>
+            </div>
+
+            <!-- Dynamic Timeline -->
+            <div class="relative pl-4 max-w-4xl mx-auto">
+                <div class="timeline-line"></div>
+                <div id="timeline-container">
+                    <!-- Phases and tasks injected here -->
+                </div>
+            </div>
+
+            <div class="mt-12 text-center">
+                <button onclick="resetData()" class="text-xs text-red-400 hover:text-red-600 underline">Resetar tudo para o padrão</button>
+            </div>
+
+        </div>
+
+        <!-- TAB: CUSTOS (CALCULATOR) -->
+        <div id="tab-custos" class="hidden">
+            
+            <!-- Top Alert -->
+            <div class="bg-blue-50 text-blue-800 p-3 rounded-lg text-sm mb-6 flex items-start gap-2 border border-blue-100">
+                <i class="fa-solid fa-info-circle mt-1"></i>
+                <div>
+                    <strong>Instrução:</strong> Mesmo que você traga ingredientes de casa, preencha o valor de mercado. Isso é essencial para saber o valor <em>real</em> do seu produto. Selecione a origem (Startup vs. Casa) para ver a divisão de investimento.
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left Column: Inputs -->
+                <div class="lg:col-span-2 space-y-6">
+
+                    <!-- Section 1: Meta -->
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span>
+                            Meta de Produção
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="input-label">Meta de Quantidade</label>
+                                <input type="number" id="meta-qtd" class="w-full border rounded p-2 bg-gray-50 focus:bg-white focus:border-green-500 outline-none transition-colors" placeholder="Ex: 50" value="50">
+                                <p class="text-xs text-gray-400 mt-1">Quantos biscoitos (ou pacotes) querem vender?</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 2: Base Recipe -->
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span>
+                            Ingredientes da Receita Base
+                        </h3>
+                        
+                        <!-- Headers -->
+                        <div class="hidden md:grid grid-cols-12 gap-2 text-xs font-bold text-gray-400 uppercase mb-2">
+                            <div class="col-span-3">Ingrediente</div>
+                            <div class="col-span-3">Preço Mercado (Kg)</div>
+                            <div class="col-span-3">Qtd. Usada (Gramas)</div>
+                            <div class="col-span-3">Quem paga?</div>
+                        </div>
+
+                        <!-- Farinha -->
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 mb-4 items-end md:items-center pb-4 border-b border-dashed">
+                            <div class="md:col-span-3 font-semibold text-sm text-gray-700">Farinha de Trigo</div>
+                            <div class="md:col-span-3 relative">
+                                <label class="md:hidden input-label">Preço Kg (R$)</label>
+                                <span class="absolute left-2 top-2 text-gray-400 text-sm">R$</span>
+                                <input type="number" step="0.01" class="calc-input w-full border rounded p-2 pl-8 text-sm" placeholder="Ex: 5.00">
+                            </div>
+                            <div class="md:col-span-3 relative">
+                                <label class="md:hidden input-label">Gramas</label>
+                                <input type="number" class="calc-input-g w-full border rounded p-2 text-sm" placeholder="Ex: 300">
+                                <span class="absolute right-2 top-2 text-gray-400 text-xs">g</span>
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="md:hidden input-label">Fonte</label>
+                                <select class="calc-source w-full border rounded p-2 text-sm bg-gray-50">
+                                    <option value="startup">💰 Startup (Caixa)</option>
+                                    <option value="proprio">🏠 Próprio (Casa)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Açúcar -->
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 mb-4 items-end md:items-center pb-4 border-b border-dashed">
+                            <div class="md:col-span-3 font-semibold text-sm text-gray-700">Açúcar</div>
+                            <div class="md:col-span-3 relative">
+                                <label class="md:hidden input-label">Preço Kg (R$)</label>
+                                <span class="absolute left-2 top-2 text-gray-400 text-sm">R$</span>
+                                <input type="number" step="0.01" class="calc-input w-full border rounded p-2 pl-8 text-sm" placeholder="Ex: 4.50">
+                            </div>
+                            <div class="md:col-span-3 relative">
+                                <label class="md:hidden input-label">Gramas</label>
+                                <input type="number" class="calc-input-g w-full border rounded p-2 text-sm" placeholder="Ex: 100">
+                                <span class="absolute right-2 top-2 text-gray-400 text-xs">g</span>
+                            </div>
+                            <div class="md:col-span-3">
+                                <select class="calc-source w-full border rounded p-2 text-sm bg-gray-50">
+                                    <option value="startup">💰 Startup (Caixa)</option>
+                                    <option value="proprio">🏠 Próprio (Casa)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Manteiga -->
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end md:items-center">
+                            <div class="md:col-span-3 font-semibold text-sm text-gray-700">Manteiga/Marg.</div>
+                            <div class="md:col-span-3 relative">
+                                <label class="md:hidden input-label">Preço Kg (R$)</label>
+                                <span class="absolute left-2 top-2 text-gray-400 text-sm">R$</span>
+                                <input type="number" step="0.01" class="calc-input w-full border rounded p-2 pl-8 text-sm" placeholder="Ex: 60.00">
+                            </div>
+                            <div class="md:col-span-3 relative">
+                                <label class="md:hidden input-label">Gramas</label>
+                                <input type="number" class="calc-input-g w-full border rounded p-2 text-sm" placeholder="Ex: 200">
+                                <span class="absolute right-2 top-2 text-gray-400 text-xs">g</span>
+                            </div>
+                            <div class="md:col-span-3">
+                                <select class="calc-source w-full border rounded p-2 text-sm bg-gray-50">
+                                    <option value="startup">💰 Startup (Caixa)</option>
+                                    <option value="proprio">🏠 Próprio (Casa)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Extras & Fixed -->
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <span class="bg-gray-800 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">3</span>
+                            Custos Extras & Fixos (Total do Lote)
+                        </h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Extras -->
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="input-label">Ingredientes Extras (Total)</label>
+                                    <div class="relative">
+                                        <span class="absolute left-2 top-2 text-gray-400 text-sm">R$</span>
+                                        <input type="number" step="0.10" class="calc-direct w-full border rounded p-2 pl-8 text-sm" placeholder="Chocolate, Confeitos...">
+                                    </div>
+                                    <select class="calc-source mt-1 w-full border rounded p-1 text-xs bg-gray-50">
+                                        <option value="startup">Pago pela Startup</option>
+                                        <option value="proprio">Trazido de Casa</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="input-label">Embalagens (Total)</label>
+                                    <div class="relative">
+                                        <span class="absolute left-2 top-2 text-gray-400 text-sm">R$</span>
+                                        <input type="number" step="0.10" class="calc-direct w-full border rounded p-2 pl-8 text-sm" placeholder="Sacos, Fitas, Caixas">
+                                    </div>
+                                    <select class="calc-source mt-1 w-full border rounded p-1 text-xs bg-gray-50">
+                                        <option value="startup">Pago pela Startup</option>
+                                        <option value="proprio">Trazido de Casa</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Fixed -->
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="input-label">Gás / Energia (Estimativa)</label>
+                                    <div class="relative">
+                                        <span class="absolute left-2 top-2 text-gray-400 text-sm">R$</span>
+                                        <input type="number" step="0.10" class="calc-direct w-full border rounded p-2 pl-8 text-sm" placeholder="Ex: 5.00">
+                                    </div>
+                                    <select class="calc-source mt-1 w-full border rounded p-1 text-xs bg-gray-50">
+                                        <option value="proprio" selected>🏠 Casa (Custo Próprio)</option>
+                                        <option value="startup">💰 Startup (Escola)</option>
+                                    </select>
+                                </div>
+                                <div class="bg-yellow-50 p-3 rounded text-xs text-yellow-800 border border-yellow-100 mt-4">
+                                    <strong>Dica:</strong> Um forno ligado por 1 hora gasta aproximadamente R$ 2,00 a R$ 5,00 de gás/luz, dependendo da região.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Results -->
+                <div class="lg:col-span-1">
+                    <div class="bg-gray-800 text-white p-6 rounded-xl shadow-lg sticky top-24">
+                        <h3 class="font-bold text-xl mb-6 text-center border-b border-gray-700 pb-4">Resultado Financeiro</h3>
+                        
+                        <!-- Breakdown -->
+                        <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
+                            <div class="bg-gray-700 p-2 rounded">
+                                <p class="text-gray-400 text-xs">Custo Startup</p>
+                                <p class="font-bold text-blue-300">R$ <span id="cost-startup">0.00</span></p>
+                            </div>
+                            <div class="bg-gray-700 p-2 rounded">
+                                <p class="text-gray-400 text-xs">Custo "De Casa"</p>
+                                <p class="font-bold text-purple-300">R$ <span id="cost-own">0.00</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Total Production Cost -->
+                        <div class="mb-2 flex justify-between items-end">
+                            <p class="text-gray-400 text-sm">Custo Total Produção</p>
+                            <p class="text-xl font-bold text-white">R$ <span id="total-cost">0.00</span></p>
+                        </div>
+
+                        <!-- Unit Cost -->
+                        <div class="mb-6 flex justify-between items-end border-b border-gray-600 pb-4">
+                            <p class="text-gray-400 text-sm">Custo Unitário</p>
+                            <p class="text-2xl font-bold text-yellow-400">R$ <span id="unit-cost">0.00</span></p>
+                        </div>
+
+                        <!-- Margin Slider -->
+                        <div class="mb-6">
+                            <label class="block text-sm text-gray-300 mb-2 flex justify-between">
+                                <span>Margem de Lucro</span>
+                                <span id="margin-display" class="font-bold text-green-400">50%</span>
+                            </label>
+                            <input type="range" id="margin-slider" min="0" max="300" value="50" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-green-500">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>0%</span>
+                                <span>300%</span>
+                            </div>
+                        </div>
+
+                        <!-- Final Price -->
+                        <div class="bg-white text-gray-900 p-5 rounded-lg text-center shadow-inner">
+                            <p class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Preço de Venda (Unitário)</p>
+                            <p class="text-4xl font-black text-green-600">R$ <span id="final-price">0.00</span></p>
+                            <p class="text-xs text-gray-400 mt-2">Lucro por unidade: R$ <span id="profit-unit">0.00</span></p>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Task Modal -->
+        <div id="task-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 m-4 relative">
+                <button onclick="closeTaskModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+                
+                <h3 id="modal-title" class="text-xl font-bold text-gray-800 mb-4">Nova Tarefa</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-600 mb-1">O que precisa ser feito?</label>
+                        <input type="text" id="modal-task-name" class="w-full border rounded p-2 focus:ring-2 focus:ring-green-500 outline-none">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-600 mb-1">Quem é o responsável?</label>
+                        <select id="modal-task-assignee" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-green-500 outline-none">
+                            <option value="">-- Selecione alguém --</option>
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">Adicione pessoas na "Equipe" para aparecerem aqui.</p>
+                    </div>
+
+                    <div id="modal-status-wrapper" class="hidden">
+                        <label class="block text-sm font-bold text-gray-600 mb-1">Status</label>
+                        <select id="modal-task-status" class="w-full border rounded p-2 bg-white focus:ring-2 focus:ring-green-500 outline-none">
+                            <option value="todo">A Fazer</option>
+                            <option value="done">Concluído</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end gap-2">
+                    <button onclick="closeTaskModal()" class="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-lg">Cancelar</button>
+                    <button onclick="saveTask()" class="px-6 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700">Salvar</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // ==========================
+        // 1. TAB LOGIC
+        // ==========================
+        function switchTab(tabName) {
+            const tabCronograma = document.getElementById('tab-cronograma');
+            const tabCustos = document.getElementById('tab-custos');
+            const btnCronograma = document.getElementById('btn-cronograma');
+            const btnCustos = document.getElementById('btn-custos');
+
+            if (tabName === 'cronograma') {
+                tabCronograma.classList.remove('hidden');
+                tabCronograma.classList.add('block');
+                tabCustos.classList.add('hidden');
+                tabCustos.classList.remove('block');
+
+                btnCronograma.className = 'pb-3 px-2 tab-active transition-all';
+                btnCustos.className = 'pb-3 px-2 tab-inactive transition-all';
+            } else {
+                tabCronograma.classList.add('hidden');
+                tabCronograma.classList.remove('block');
+                tabCustos.classList.remove('hidden');
+                tabCustos.classList.add('block');
+
+                btnCronograma.className = 'pb-3 px-2 tab-inactive transition-all';
+                btnCustos.className = 'pb-3 px-2 tab-active transition-all';
+            }
+        }
+
+        // ==========================
+        // 2. DATA & STATE
+        // ==========================
+        const STORAGE_KEY_V2 = 'startup_natal_v2_data';
+
+        // Hardcoded Phases Structure
+        const phasesConfig = [
+            { id: 'p1', title: 'Semana 1: Ideação & Marca', dates: '18-24 Nov', color: 'blue', icon: '1' },
+            { id: 'p2', title: 'Semana 2: Finanças & Web', dates: '25-30 Nov', color: 'purple', icon: '2' },
+            { id: 'p3', title: 'Produção', dates: '01-10 Dez', color: 'red', icon: '<i class="fa-solid fa-fire"></i>' },
+            { id: 'p4', title: 'A Grande Feira', dates: '13 Dez', color: 'yellow', icon: '<i class="fa-solid fa-star"></i>' }
+        ];
+
+        // Default Data
+        const defaultData = {
+            members: [],
+            tasks: [
+                { id: 1, phaseId: 'p1', title: "Definir a Dupla & Persona", assignee: "Todos", status: "done" },
+                { id: 2, phaseId: 'p1', title: "Criar Nome e Logo no Canva", assignee: "", status: "todo" },
+                { id: 3, phaseId: 'p2', title: "Comprar Ingredientes", assignee: "", status: "todo" },
+                { id: 4, phaseId: 'p2', title: "Criar página no Site", assignee: "", status: "todo" },
+                { id: 5, phaseId: 'p3', title: "Assar primeira leva", assignee: "", status: "todo" },
+                { id: 6, phaseId: 'p3', title: "Embalar produtos", assignee: "", status: "todo" }
+            ]
+        };
+
+        // Load Data
+        let appData = JSON.parse(localStorage.getItem(STORAGE_KEY_V2)) || JSON.parse(JSON.stringify(defaultData));
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(appData));
+            renderApp();
+        }
+
+        function resetData() {
+            if(confirm("Isso apagará todas as tarefas e membros criados. Tem certeza?")) {
+                appData = JSON.parse(JSON.stringify(defaultData));
+                saveData();
+            }
+        }
+
+        // ==========================
+        // 3. TEAM LOGIC
+        // ==========================
+        function addMember() {
+            const input = document.getElementById('new-member-name');
+            const name = input.value.trim();
+            if(!name) return;
+            
+            if(!appData.members) appData.members = [];
+            appData.members.push(name);
+            input.value = '';
+            saveData();
+        }
+
+        function removeMember(index) {
+            if(confirm("Remover este integrante?")) {
+                appData.members.splice(index, 1);
+                saveData();
+            }
+        }
+
+        function renderTeam() {
+            const list = document.getElementById('team-list');
+            const msg = document.getElementById('no-members-msg');
+            
+            list.innerHTML = '';
+            
+            if(!appData.members || appData.members.length === 0) {
+                list.appendChild(msg);
+                msg.style.display = 'block';
+                return;
+            }
+            msg.style.display = 'none';
+
+            appData.members.forEach((member, index) => {
+                const tag = document.createElement('div');
+                tag.className = "bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-2";
+                tag.innerHTML = `
+                    ${member}
+                    <button onclick="removeMember(${index})" class="text-green-600 hover:text-red-500"><i class="fa-solid fa-times"></i></button>
+                `;
+                list.appendChild(tag);
+            });
+        }
+
+        // ==========================
+        // 4. TIMELINE LOGIC
+        // ==========================
+        
+        // Modal State
+        let currentEditingTaskId = null;
+        let currentAddingPhaseId = null;
+
+        function openTaskModal(phaseId = null, taskId = null) {
+            const modal = document.getElementById('task-modal');
+            const titleInput = document.getElementById('modal-task-name');
+            const assigneeSelect = document.getElementById('modal-task-assignee');
+            const statusWrapper = document.getElementById('modal-status-wrapper');
+            const statusSelect = document.getElementById('modal-task-status');
+            const modalTitle = document.getElementById('modal-title');
+
+            // Populate Members Dropdown
+            assigneeSelect.innerHTML = '<option value="">-- Selecione alguém --</option>';
+            if(appData.members && appData.members.length > 0) {
+                appData.members.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m;
+                    opt.innerText = m;
+                    assigneeSelect.appendChild(opt);
+                });
+            }
+
+            if (taskId) {
+                // EDIT MODE
+                const task = appData.tasks.find(t => t.id === taskId);
+                currentEditingTaskId = taskId;
+                currentAddingPhaseId = null;
+                
+                modalTitle.innerText = "Editar Tarefa";
+                titleInput.value = task.title;
+                assigneeSelect.value = task.assignee || "";
+                statusWrapper.classList.remove('hidden');
+                statusSelect.value = task.status;
+
+            } else {
+                // CREATE MODE
+                currentEditingTaskId = null;
+                currentAddingPhaseId = phaseId;
+                
+                modalTitle.innerText = "Nova Tarefa";
+                titleInput.value = "";
+                assigneeSelect.value = "";
+                statusWrapper.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            titleInput.focus();
+        }
+
+        function closeTaskModal() {
+            document.getElementById('task-modal').classList.add('hidden');
+        }
+
+        function saveTask() {
+            const titleInput = document.getElementById('modal-task-name');
+            const assigneeSelect = document.getElementById('modal-task-assignee');
+            const statusSelect = document.getElementById('modal-task-status');
+
+            const title = titleInput.value.trim();
+            const assignee = assigneeSelect.value;
+
+            if(!title) return alert("Digite o nome da tarefa");
+
+            if (currentEditingTaskId) {
+                // Update existing
+                const taskIndex = appData.tasks.findIndex(t => t.id === currentEditingTaskId);
+                if(taskIndex > -1) {
+                    appData.tasks[taskIndex].title = title;
+                    appData.tasks[taskIndex].assignee = assignee;
+                    appData.tasks[taskIndex].status = statusSelect.value;
+                }
+            } else {
+                // Create new
+                const newTask = {
+                    id: Date.now(),
+                    phaseId: currentAddingPhaseId,
+                    title: title,
+                    assignee: assignee,
+                    status: 'todo'
+                };
+                appData.tasks.push(newTask);
+            }
+
+            saveData();
+            closeTaskModal();
+        }
+
+        function toggleTaskStatus(id) {
+            const task = appData.tasks.find(t => t.id === id);
+            if(task) {
+                task.status = (task.status === 'todo') ? 'done' : 'todo';
+                saveData();
+            }
+        }
+
+        function deleteTask(id) {
+            if(confirm("Excluir tarefa?")) {
+                appData.tasks = appData.tasks.filter(t => t.id !== id);
+                saveData();
+            }
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = '';
+
+            phasesConfig.forEach(phase => {
+                // Filter tasks for this phase
+                const tasks = appData.tasks.filter(t => t.phaseId === phase.id);
+                
+                // Colors
+                let bgHeader = '', textHeader = '', borderClass = '';
+                if(phase.color === 'blue') { bgHeader = 'bg-blue-100'; textHeader = 'text-blue-600'; borderClass = 'border-blue-200'; }
+                else if(phase.color === 'purple') { bgHeader = 'bg-purple-100'; textHeader = 'text-purple-600'; borderClass = 'border-purple-200'; }
+                else if(phase.color === 'red') { bgHeader = 'bg-red-100'; textHeader = 'text-red-600'; borderClass = 'border-red-200'; }
+                else { bgHeader = 'bg-yellow-100'; textHeader = 'text-yellow-600'; borderClass = 'border-yellow-200'; }
+
+                // Build HTML for Phase
+                const phaseHTML = document.createElement('div');
+                phaseHTML.className = "mb-8 relative z-10";
+                
+                let tasksHTML = '';
+                
+                if(tasks.length === 0) {
+                    tasksHTML = `<div class="ml-14 text-sm text-gray-400 italic mb-3">Nenhuma tarefa criada ainda.</div>`;
+                } else {
+                    tasks.forEach(task => {
+                        const isDone = task.status === 'done';
+                        const statusClass = isDone ? 'bg-green-50 border-green-200 opacity-75' : 'bg-white border-gray-100 hover:shadow-md';
+                        const checkIcon = isDone ? '<i class="fa-solid fa-check-circle text-green-500 text-xl"></i>' : '<i class="fa-regular fa-circle text-gray-300 text-xl hover:text-green-500"></i>';
+                        const textDecor = isDone ? 'line-through text-gray-400' : 'text-gray-800';
+                        const assigneeBadge = task.assignee ? `<span class="text-xs bg-gray-200 px-2 py-0.5 rounded text-gray-600"><i class="fa-solid fa-user mr-1"></i>${task.assignee}</span>` : '';
+
+                        tasksHTML += `
+                            <div class="ml-14 p-3 rounded-lg shadow-sm border mb-2 flex items-center gap-3 transition-all ${statusClass}">
+                                <button onclick="toggleTaskStatus(${task.id})" class="focus:outline-none">
+                                    ${checkIcon}
+                                </button>
+                                <div class="flex-1 cursor-pointer" onclick="openTaskModal(null, ${task.id})">
+                                    <p class="font-bold text-sm ${textDecor}">${task.title}</p>
+                                    ${assigneeBadge}
+                                </div>
+                                <button onclick="openTaskModal(null, ${task.id})" class="text-gray-300 hover:text-blue-500 px-2"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteTask(${task.id})" class="text-gray-300 hover:text-red-500 px-2"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        `;
+                    });
+                }
+
+                phaseHTML.innerHTML = `
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full ${bgHeader} ${textHeader} flex items-center justify-center border-4 border-white shadow-sm font-bold text-lg">
+                            ${phase.icon}
+                        </div>
+                        <div class="ml-4">
+                            <h2 class="text-lg font-bold text-gray-700 leading-none">${phase.title}</h2>
+                            <span class="text-xs font-bold ${textHeader} bg-white px-2 py-0.5 rounded-full border ${borderClass} mt-1 inline-block">${phase.dates}</span>
+                        </div>
+                    </div>
+                    ${tasksHTML}
+                    <div class="ml-14">
+                        <button onclick="openTaskModal('${phase.id}')" class="text-xs font-bold text-gray-400 hover:text-green-600 flex items-center gap-1 transition-colors">
+                            <i class="fa-solid fa-plus-circle"></i> Nova tarefa nesta fase
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(phaseHTML);
+            });
+        }
+
+        function renderApp() {
+            renderTeam();
+            renderTimeline();
+        }
+
+        // ==========================
+        // 5. CALCULATOR LOGIC (Existing)
+        // ==========================
+        // Selectors
+        const metaQtdInput = document.getElementById('meta-qtd');
+        const calcInputs = document.querySelectorAll('.calc-input'); // Price per Kg
+        const calcInputsG = document.querySelectorAll('.calc-input-g'); // Grams used
+        const calcDirects = document.querySelectorAll('.calc-direct'); // Direct Costs (Extras/Fixed)
+        const calcSources = document.querySelectorAll('.calc-source'); // Dropdowns
+        const marginSlider = document.getElementById('margin-slider');
+        
+        // Output Elements
+        const elCostStartup = document.getElementById('cost-startup');
+        const elCostOwn = document.getElementById('cost-own');
+        const elTotalCost = document.getElementById('total-cost');
+        const elUnitCost = document.getElementById('unit-cost');
+        const elMarginDisplay = document.getElementById('margin-display');
+        const elFinalPrice = document.getElementById('final-price');
+        const elProfitUnit = document.getElementById('profit-unit');
+
+        function calculate() {
+            let totalStartup = 0;
+            let totalOwn = 0;
+
+            const val = (el) => parseFloat(el.value) || 0;
+
+            // Base ingredients (First 3 rows)
+            for(let i=0; i<3; i++) {
+                const pricePerKg = val(calcInputs[i]);
+                const grams = val(calcInputsG[i]);
+                const source = calcSources[i].value;
+                const cost = (pricePerKg / 1000) * grams;
+
+                if(source === 'startup') totalStartup += cost;
+                else totalOwn += cost;
+            }
+
+            // Direct Costs (Next 3 rows)
+            for(let i=0; i<3; i++) {
+                const directCost = val(calcDirects[i]);
+                const source = calcSources[i+3].value; 
+
+                if(source === 'startup') totalStartup += directCost;
+                else totalOwn += directCost;
+            }
+
+            const totalCost = totalStartup + totalOwn;
+            const quantity = val(metaQtdInput) || 1;
+            const unitCost = totalCost / quantity;
+            const margin = parseInt(marginSlider.value);
+            const finalPrice = unitCost * (1 + (margin/100));
+            const profit = finalPrice - unitCost;
+
+            elCostStartup.innerText = totalStartup.toFixed(2);
+            elCostOwn.innerText = totalOwn.toFixed(2);
+            elTotalCost.innerText = totalCost.toFixed(2);
+            elUnitCost.innerText = unitCost.toFixed(2);
+            elMarginDisplay.innerText = margin + "%";
+            elFinalPrice.innerText = finalPrice.toFixed(2);
+            elProfitUnit.innerText = profit.toFixed(2);
+        }
+
+        // Event Listeners for Calculator
+        const allInputs = [...calcInputs, ...calcInputsG, ...calcDirects, metaQtdInput, marginSlider];
+        const allSelects = [...calcSources];
+
+        allInputs.forEach(el => el.addEventListener('input', calculate));
+        allSelects.forEach(el => el.addEventListener('change', calculate));
+
+        // Initial Loads
+        calculate();
+        renderApp();
+
+    </script>
+</body>
+</html>
