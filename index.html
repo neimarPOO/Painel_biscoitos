@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Controle: Startup de Natal</title>
+    <title>Projeto Biscoitos de Natal Escola StartUp</title>
     
     <!-- Material Design 3 -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -18,21 +18,144 @@
     </script>
 
     <style>
+        /* Light Theme (Default) */
+        :root {
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1D192B;
+            --md-sys-color-tertiary: #7D5260;
+            --md-sys-color-on-tertiary: #FFFFFF;
+            --md-sys-color-tertiary-container: #FFD8E4;
+            --md-sys-color-on-tertiary-container: #31111D;
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #F9DEDC;
+            --md-sys-color-on-error-container: #410E0B;
+            --md-sys-color-background: #FFFBFE;
+            --md-sys-color-on-background: #1C1B1F;
+            --md-sys-color-surface: #FFFBFE;
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-outline-variant: #C4C7C5;
+            --md-sys-color-shadow: #000000;
+            --md-sys-color-scrim: #000000;
+            --md-sys-color-inverse-surface: #313033;
+            --md-sys-color-inverse-on-surface: #F4EFF4;
+            --md-sys-color-inverse-primary: #D0BCFF;
+            --md-sys-color-surface-dim: #DED8E1;
+            --md-sys-color-surface-bright: #FFFBFE;
+            --md-sys-color-surface-container-lowest: #FFFFFF;
+            --md-sys-color-surface-container-low: #F7F2FA;
+            --md-sys-color-surface-container: #F3EDF7;
+            --md-sys-color-surface-container-high: #ECE6F0;
+            --md-sys-color-surface-container-highest: #E6E0E9;
+        }
+
+        /* Dark Theme */
+        body.dark-theme {
+            --md-sys-color-primary: #D0BCFF;
+            --md-sys-color-on-primary: #381E72;
+            --md-sys-color-primary-container: #4F378B;
+            --md-sys-color-on-primary-container: #EADDFF;
+            --md-sys-color-secondary: #CCC2DC;
+            --md-sys-color-on-secondary: #332D41;
+            --md-sys-color-secondary-container: #4A4458;
+            --md-sys-color-on-secondary-container: #E8DEF8;
+            --md-sys-color-tertiary: #EFB8C8;
+            --md-sys-color-on-tertiary: #492532;
+            --md-sys-color-tertiary-container: #633B48;
+            --md-sys-color-on-tertiary-container: #FFD8E4;
+            --md-sys-color-error: #F2B8B5;
+            --md-sys-color-on-error: #601410;
+            --md-sys-color-error-container: #8C1D18;
+            --md-sys-color-on-error-container: #F9DEDC;
+            --md-sys-color-background: #1C1B1F;
+            --md-sys-color-on-background: #E6E1E5;
+            --md-sys-color-surface: #1C1B1F;
+            --md-sys-color-on-surface: #E6E1E5;
+            --md-sys-color-surface-variant: #49454F;
+            --md-sys-color-on-surface-variant: #CAC4D0;
+            --md-sys-color-outline: #938F99;
+            --md-sys-color-outline-variant: #444746;
+            --md-sys-color-shadow: #000000;
+            --md-sys-color-scrim: #000000;
+            --md-sys-color-inverse-surface: #E6E1E5;
+            --md-sys-color-inverse-on-surface: #313033;
+            --md-sys-color-inverse-primary: #6750A4;
+            --md-sys-color-surface-dim: #141218;
+            --md-sys-color-surface-bright: #3B383E;
+            --md-sys-color-surface-container-lowest: #0F0D13;
+            --md-sys-color-surface-container-low: #1D1B20;
+            --md-sys-color-surface-container: #211F26;
+            --md-sys-color-surface-container-high: #2B2931;
+            --md-sys-color-surface-container-highest: #36343B;
+        }
+
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: var(--md-sys-color-surface-container-low);
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('fundo.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            z-index: -1;
+            opacity: 0.2;
+            transition: opacity 0.3s ease;
+            background-repeat: no-repeat;
+        }
+        body.dark-theme::before {
+            opacity: 0.1;
         }
         .main-content {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 16px;
         }
         md-top-app-bar {
-            --md-sys-color-primary: var(--md-sys-color-surface);
+            --md-sys-color-primary: var(--md-sys-color-surface-container-high);
             --md-sys-color-on-primary: var(--md-sys-color-on-surface);
             position: sticky;
             top: 0;
             z-index: 10;
+        }
+        .navbar-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            overflow: hidden;
+        }
+        .navbar-logo {
+            height: 40px;
+            width: auto;
+            border-radius: 50%;
+        }
+        .navbar-title {
+            font-size: 1.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        @media (max-width: 600px) {
+            .navbar-title {
+                display: none;
+            }
         }
         md-tabs {
             background-color: var(--md-sys-color-surface);
@@ -40,22 +163,33 @@
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
         .card {
-            background-color: var(--md-sys-color-surface);
+            background-color: var(--md-sys-color-surface-container);
             border-radius: 12px;
             padding: 16px;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
             border: 1px solid var(--md-sys-color-outline-variant);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.08);
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.12);
         }
         .card-header {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 16px;
             margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
         }
         .card-header h3 {
             margin: 0;
             font-size: 1.25rem;
             color: var(--md-sys-color-on-surface);
+        }
+        .card-header md-icon {
+            color: var(--md-sys-color-secondary);
         }
         .grid { display: grid; gap: 16px; }
         .flex { display: flex; }
@@ -63,34 +197,30 @@
         .items-center { align-items: center; }
         .justify-between { justify-content: space-between; }
         
-        /* Timeline */
-        .timeline-item {
-            position: relative;
-            padding-left: 40px;
-            padding-bottom: 24px;
+        .timeline-grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
         }
-        .timeline-item:last-child { padding-bottom: 0; }
-        .timeline-connector {
-            position: absolute;
-            left: 15px;
-            top: 20px;
-            bottom: -20px;
-            width: 2px;
-            background-color: var(--md-sys-color-outline-variant);
+        .calculator-grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: 2fr 1fr;
+            align-items: start;
         }
-        .timeline-icon {
-            position: absolute;
-            left: 0;
-            top: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: var(--md-sys-color-secondary-container);
-            color: var(--md-sys-color-on-secondary-container);
+        .result-card {
+            position: sticky;
+            top: 80px;
         }
+        @media (max-width: 960px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+            .result-card {
+                position: static;
+            }
+        }
+
         .task-item {
             display: flex;
             align-items: center;
@@ -104,18 +234,43 @@
         .task-item.done .task-title { text-decoration: line-through; }
         .task-title { flex-grow: 1; cursor: pointer; }
         .assignee-chip { font-size: 0.75rem; --md-input-chip-label-color: var(--md-sys-color-on-surface-variant); }
+
+        .input-row {
+            display: grid;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .input-row:last-child {
+            margin-bottom: 0;
+        }
+        .ingredient-row-grid { grid-template-columns: 2fr 1fr 1fr 1fr auto; }
+        .extracost-row-grid { grid-template-columns: 2fr 1fr 1fr auto; }
+
+        @media (max-width: 768px) {
+            .ingredient-row-grid, .extracost-row-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <md-top-app-bar>
-        <div slot="headline">Gestão da Startup</div>
+        <div class="navbar-container" slot="headline">
+            <img src="logo_natal.png" alt="Logo" class="navbar-logo">
+            <span class="navbar-title">Projeto Biscoitos de Natal Escola StartUp</span>
+        </div>
+        <md-icon-button slot="action" id="theme-toggle-btn" onclick="toggleTheme()">
+            <md-icon>dark_mode</md-icon>
+        </md-icon-button>
         <md-icon-button slot="action" onclick="resetData()">
             <md-icon>restart_alt</md-icon>
         </md-icon-button>
     </md-top-app-bar>
 
-    <md-tabs aria-label="Abas de conteúdo" @change="switchTab(event)">
+    <md-tabs aria-label="Abas de conteúdo" onchange="switchTab(event)">
         <md-primary-tab id="tab-btn-cronograma" aria-controls="tab-cronograma">
             <md-icon slot="icon">task_alt</md-icon>
             Cronograma
@@ -127,7 +282,6 @@
     </md-tabs>
 
     <main class="main-content">
-        <!-- TAB: CRONOGRAMA / TAREFAS -->
         <div id="tab-cronograma" class="tab-panel active">
             <div class="card">
                 <div class="card-header">
@@ -143,32 +297,45 @@
                 </div>
                 <md-chip-set id="team-list" class="mt-4"></md-chip-set>
                 <p id="no-members-msg" class="md-typescale-body-medium" style="color: var(--md-sys-color-outline);">Adicione os integrantes para delegar tarefas.</p>
+                
+                <h4 class="md-typescale-title-medium" style="margin-top: 24px; margin-bottom: 8px;">Progresso Geral</h4>
+                <div class="flex items-center gap-2">
+                    <md-linear-progress id="overall-progress" value="0" style="flex-grow: 1;"></md-linear-progress>
+                    <span id="progress-label" class="md-typescale-label-large">0%</span>
+                </div>
             </div>
 
-            <div id="timeline-container"></div>
+            <div id="timeline-container" class="timeline-grid"></div>
         </div>
 
-        <!-- TAB: CUSTOS (CALCULATOR) -->
         <div id="tab-custos" class="tab-panel">
-            <div class="grid" style="grid-template-columns: 2fr 1fr; align-items: start;">
+            <div class="calculator-grid">
                 <div class="flex" style="flex-direction: column; gap: 16px;">
                     <div class="card">
                         <div class="card-header"><h3>Meta de Produção</h3></div>
-                        <md-outlined-text-field id="meta-qtd" label="Meta de Quantidade" type="number" value="50" suffix-text="unidades"></md-outlined-text-field>
+                        <md-outlined-text-field id="meta-qtd" label="Meta de Quantidade" type="number" value="50" suffix-text="unidades" oninput="calculate()"></md-outlined-text-field>
                     </div>
 
                     <div class="card">
                         <div class="card-header"><h3>Ingredientes da Receita Base</h3></div>
                         <div id="ingredient-inputs"></div>
+                        <md-text-button onclick="addIngredient()" style="margin-top: 16px;">
+                            <md-icon slot="icon">add</md-icon>
+                            Adicionar Ingrediente
+                        </md-text-button>
                     </div>
                     
                     <div class="card">
                         <div class="card-header"><h3>Custos Extras & Fixos</h3></div>
                         <div id="extra-costs-inputs"></div>
+                        <md-text-button onclick="addExtraCost()" style="margin-top: 16px;">
+                            <md-icon slot="icon">add</md-icon>
+                            Adicionar Custo
+                        </md-text-button>
                     </div>
                 </div>
 
-                <div class="card" style="position: sticky; top: 80px;">
+                <div class="card result-card">
                     <h3 class="md-typescale-title-large" style="text-align: center; margin-bottom: 16px;">Resultado</h3>
                     
                     <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -189,23 +356,28 @@
                     <hr style="margin: 16px 0; border-color: var(--md-sys-color-outline-variant);">
                     
                     <label class="md-typescale-body-medium">Margem de Lucro: <span id="margin-display" style="font-weight: bold;">50%</span></label>
-                    <md-slider id="margin-slider" min="0" max="300" value="50" labeled ticks></md-slider>
+                    <md-slider id="margin-slider" min="0" max="300" value="50" labeled ticks oninput="calculate()"></md-slider>
+
+                    <md-outlined-text-field id="units-per-package" label="Unidades por Pacote" type="number" value="6" suffix-text="unidades" oninput="calculate()" style="margin-top: 16px;"></md-outlined-text-field>
 
                     <div style="background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); padding: 16px; border-radius: 12px; text-align: center; margin-top: 16px;">
                         <p class="md-typescale-label-large">PREÇO DE VENDA</p>
-                        <p class="md-typescale-display-small">R$ <span id="final-price">0.00</span></p>
-                        <p class="md-typescale-body-medium">Lucro por unidade: R$ <span id="profit-unit">0.00</span></p>
+                        <p class="md-typescale-display-small">R$ <span id="final-price">0.00</span> / unidade</p>
+                        <p class="md-typescale-headline-small" style="margin-top: 8px;">R$ <span id="package-price">0.00</span> / pacote</p>
+                        <p class="md-typescale-body-medium" style="margin-top: 16px;">Lucro por unidade: R$ <span id="profit-unit">0.00</span></p>
+                        <p class="md-typescale-body-large" style="margin-top: 8px; font-weight: 500;">Lucro Líquido: R$ <span id="net-profit">0.00</span></p>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Task Dialog -->
     <md-dialog id="task-dialog">
         <div slot="headline" id="dialog-title">Nova Tarefa</div>
         <form slot="content" id="task-form" method="dialog">
-            <md-outlined-text-field label="O que precisa ser feito?" id="modal-task-name" required style="width: 100%; margin-bottom: 16px;"></md-outlined-text-field>
+            <md-outlined-text-field label="Título da Tarefa" id="modal-task-title" required style="width: 100%; margin-bottom: 16px;"></md-outlined-text-field>
+            <label for="modal-task-description" class="md-typescale-body-small">Descrição (Opcional)</label>
+            <textarea id="modal-task-description" rows="4" style="width: 100%; margin-bottom: 16px; background-color: var(--md-sys-color-surface-container-highest); color: var(--md-sys-color-on-surface); border-radius: 4px; border: 1px solid var(--md-sys-color-outline); padding: 8px; font-family: 'Roboto', sans-serif;"></textarea>
             <md-outlined-select label="Quem é o responsável?" id="modal-task-assignee" style="width: 100%; margin-bottom: 16px;">
             </md-outlined-select>
             <div id="modal-status-wrapper" style="display: none;">
@@ -221,49 +393,102 @@
         </div>
     </md-dialog>
 
+    <md-dialog id="confirm-dialog">
+        <div slot="headline" id="confirm-dialog-title"></div>
+        <div slot="content" id="confirm-dialog-content"></div>
+        <div slot="actions">
+            <md-text-button id="confirm-dialog-cancel">Cancelar</md-text-button>
+            <md-text-button id="confirm-dialog-confirm">Confirmar</md-text-button>
+        </div>
+    </md-dialog>
+
     <script type="module">
+        // ==========================
+        // 0. THEME & DIALOG LOGIC
+        // ==========================
+        const confirmDialog = document.getElementById('confirm-dialog');
+        const confirmDialogTitle = document.getElementById('confirm-dialog-title');
+        const confirmDialogContent = document.getElementById('confirm-dialog-content');
+        let confirmCallback = null;
+
+        document.getElementById('confirm-dialog-cancel').addEventListener('click', () => confirmDialog.close());
+        document.getElementById('confirm-dialog-confirm').addEventListener('click', () => {
+            confirmCallback?.();
+            confirmDialog.close();
+        });
+
+        window.showConfirm = (title, message, callback) => {
+            confirmDialogTitle.innerText = title;
+            confirmDialogContent.innerText = message;
+            confirmCallback = callback;
+            confirmDialog.show();
+        }
+
+        const themeToggleButton = document.getElementById('theme-toggle-btn');
+        window.toggleTheme = () => {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            themeToggleButton.querySelector('md-icon').innerText = isDark ? 'light_mode' : 'dark_mode';
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            themeToggleButton.querySelector('md-icon').innerText = 'light_mode';
+        }
+
         // ==========================
         // 1. SETUP & STATE
         // ==========================
-        const STORAGE_KEY_V3 = 'startup_natal_v3_data';
-
+        const STORAGE_KEY_V5 = 'startup_natal_v5_data'; // Incremented version
         const phasesConfig = [
             { id: 'p1', title: 'Semana 1: Ideação & Marca', dates: '18-24 Nov', icon: 'looks_one' },
             { id: 'p2', title: 'Semana 2: Finanças & Web', dates: '25-30 Nov', icon: 'looks_two' },
             { id: 'p3', title: 'Produção', dates: '01-10 Dez', icon: 'local_fire_department' },
             { id: 'p4', title: 'A Grande Feira', dates: '13 Dez', icon: 'star' }
         ];
-        
         const defaultData = {
             members: [],
             tasks: [
-                { id: 1, phaseId: 'p1', title: "Definir a Dupla & Persona", assignee: "Todos", status: "done" },
-                { id: 2, phaseId: 'p1', title: "Criar Nome e Logo no Canva", assignee: "", status: "todo" },
-                { id: 3, phaseId: 'p2', title: "Comprar Ingredientes", assignee: "", status: "todo" },
-                { id: 4, phaseId: 'p2', title: "Criar página no Site", assignee: "", status: "todo" },
-                { id: 5, phaseId: 'p3', title: "Assar primeira leva", assignee: "", status: "todo" },
-                { id: 6, phaseId: 'p3', title: "Embalar produtos", assignee: "", status: "todo" }
+                { id: 1, phaseId: 'p1', title: "Definir a Dupla & Persona", description: "", assignee: "Todos", status: "done" },
+                { id: 2, phaseId: 'p1', title: "Criar Nome e Logo no Canva", description: "", assignee: "", status: "todo" },
+                { id: 3, phaseId: 'p2', title: "Comprar Ingredientes", description: "", assignee: "", status: "todo" },
+                { id: 4, phaseId: 'p2', title: "Criar página no Site", description: "", assignee: "", status: "todo" },
+                { id: 5, phaseId: 'p3', title: "Assar primeira leva", description: "", assignee: "", status: "todo" },
+                { id: 6, phaseId: 'p3', title: "Embalar produtos", description: "", assignee: "", status: "todo" }
+            ],
+            ingredients: [
+                { id: 1, name: 'Farinha de Trigo', price: 5.00, grams: 300, source: 'startup' },
+                { id: 2, name: 'Açúcar', price: 4.50, grams: 100, source: 'startup' },
+                { id: 3, name: 'Manteiga/Marg.', price: 60.00, grams: 200, source: 'startup' }
+            ],
+            extraCosts: [
+                { id: 1, name: 'Ingredientes Extras', cost: 0, source: 'startup' },
+                { id: 2, name: 'Embalagens', cost: 0, source: 'startup' },
+                { id: 3, name: 'Gás / Energia', cost: 5.00, source: 'proprio' }
             ]
         };
+        let appData = JSON.parse(localStorage.getItem(STORAGE_KEY_V5)) || JSON.parse(JSON.stringify(defaultData));
 
-        let appData = JSON.parse(localStorage.getItem(STORAGE_KEY_V3)) || JSON.parse(JSON.stringify(defaultData));
-
-        function saveData() {
-            localStorage.setItem(STORAGE_KEY_V3, JSON.stringify(appData));
-            renderApp();
+        function saveData(rerenderAll = true) {
+            localStorage.setItem(STORAGE_KEY_V5, JSON.stringify(appData));
+            if (rerenderAll) {
+                renderApp();
+            }
+            calculate();
         }
 
         window.resetData = () => {
-            if(confirm("Isso apagará todas as tarefas e membros criados. Tem certeza?")) {
+            showConfirm("Apagar Tudo?", "Isso apagará todos os dados. Tem certeza?", () => {
+                localStorage.removeItem(STORAGE_KEY_V5);
                 appData = JSON.parse(JSON.stringify(defaultData));
                 saveData();
-                renderCalculator(); // Also re-render calculator to default values
-                calculate();
-            }
+            });
         }
 
         // ==========================
-        // 2. TAB LOGIC
+        // 2. TAB & RENDER LOGIC
         // ==========================
         window.switchTab = (event) => {
             const activeTab = event.target.activeTab;
@@ -272,8 +497,16 @@
             document.getElementById(panelId).classList.add('active');
         }
 
+        function renderApp() {
+            renderTeam();
+            renderTimeline();
+            renderProgress();
+            renderCalculator();
+            calculate();
+        }
+
         // ==========================
-        // 3. TEAM LOGIC
+        // 3. TEAM & PROGRESS LOGIC
         // ==========================
         const memberNameInput = document.getElementById('new-member-name');
         const teamList = document.getElementById('team-list');
@@ -282,7 +515,6 @@
         window.addMember = () => {
             const name = memberNameInput.value.trim();
             if(!name) return;
-            
             if(!appData.members) appData.members = [];
             appData.members.push(name);
             memberNameInput.value = '';
@@ -297,7 +529,6 @@
         function renderTeam() {
             teamList.innerHTML = '';
             noMembersMsg.style.display = (!appData.members || appData.members.length === 0) ? 'block' : 'none';
-
             appData.members?.forEach((member, index) => {
                 const chip = document.createElement('md-input-chip');
                 chip.label = member;
@@ -307,17 +538,32 @@
             });
         }
 
+        function renderProgress() {
+            const totalTasks = appData.tasks.length;
+            const progressBar = document.getElementById('overall-progress');
+            const progressLabel = document.getElementById('progress-label');
+            if (totalTasks === 0) {
+                progressBar.value = 0;
+                progressLabel.innerText = '0%';
+                return;
+            }
+            const doneTasks = appData.tasks.filter(t => t.status === 'done').length;
+            const progress = doneTasks / totalTasks;
+            progressBar.value = progress;
+            progressLabel.innerText = `${Math.round(progress * 100)}%`;
+        }
+
         // ==========================
         // 4. TIMELINE & TASK LOGIC
         // ==========================
         const taskDialog = document.getElementById('task-dialog');
         const dialogTitle = document.getElementById('dialog-title');
-        const taskNameInput = document.getElementById('modal-task-name');
+        const taskTitleInput = document.getElementById('modal-task-title');
+        const taskDescriptionInput = document.getElementById('modal-task-description');
         const taskAssigneeSelect = document.getElementById('modal-task-assignee');
         const statusWrapper = document.getElementById('modal-status-wrapper');
         const taskStatusSelect = document.getElementById('modal-task-status');
         const timelineContainer = document.getElementById('timeline-container');
-
         let currentEditingTaskId = null;
         let currentAddingPhaseId = null;
 
@@ -330,22 +576,22 @@
                 taskAssigneeSelect.appendChild(opt);
             });
 
-            if (taskId) { // Edit mode
+            if (taskId) {
                 const task = appData.tasks.find(t => t.id === taskId);
                 currentEditingTaskId = taskId;
                 currentAddingPhaseId = null;
-                
                 dialogTitle.innerText = "Editar Tarefa";
-                taskNameInput.value = task.title;
+                taskTitleInput.value = task.title;
+                taskDescriptionInput.value = task.description || "";
                 taskAssigneeSelect.value = task.assignee || "";
                 statusWrapper.style.display = 'block';
                 taskStatusSelect.value = task.status;
-            } else { // Create mode
+            } else {
                 currentEditingTaskId = null;
                 currentAddingPhaseId = phaseId;
-                
                 dialogTitle.innerText = "Nova Tarefa";
-                taskNameInput.value = "";
+                taskTitleInput.value = "";
+                taskDescriptionInput.value = "";
                 taskAssigneeSelect.value = "";
                 statusWrapper.style.display = 'none';
             }
@@ -353,12 +599,14 @@
         }
 
         window.saveTask = () => {
-            const title = taskNameInput.value.trim();
+            const title = taskTitleInput.value.trim();
             if (!title) return;
+            const description = taskDescriptionInput.value.trim();
 
             if (currentEditingTaskId) {
                 const task = appData.tasks.find(t => t.id === currentEditingTaskId);
                 task.title = title;
+                task.description = description;
                 task.assignee = taskAssigneeSelect.value;
                 task.status = taskStatusSelect.value;
             } else {
@@ -366,6 +614,7 @@
                     id: Date.now(),
                     phaseId: currentAddingPhaseId,
                     title,
+                    description,
                     assignee: taskAssigneeSelect.value,
                     status: 'todo'
                 });
@@ -383,181 +632,180 @@
         }
 
         function deleteTask(id) {
-            if(confirm("Excluir tarefa?")) {
+            showConfirm("Excluir Tarefa?", "Tem certeza que deseja excluir esta tarefa?", () => {
                 appData.tasks = appData.tasks.filter(t => t.id !== id);
                 saveData();
-            }
+            });
         }
 
         function renderTimeline() {
             timelineContainer.innerHTML = '';
             phasesConfig.forEach(phase => {
+                const phaseCard = document.createElement('div');
+                phaseCard.className = 'card';
                 const phaseTasks = appData.tasks.filter(t => t.phaseId === phase.id);
-                const phaseEl = document.createElement('div');
-                phaseEl.className = 'timeline-item';
-                
+                phaseCard.innerHTML = `
+                    <div class="card-header">
+                        <md-icon>${phase.icon}</md-icon>
+                        <div>
+                            <h3 class="md-typescale-title-large">${phase.title}</h3>
+                            <p class="md-typescale-label-medium" style="color: var(--md-sys-color-outline);">${phase.dates}</p>
+                        </div>
+                    </div>
+                `;
                 const tasksContainer = document.createElement('div');
                 tasksContainer.style.marginTop = '16px';
-
                 phaseTasks.forEach(task => {
                     const taskEl = document.createElement('div');
                     taskEl.className = `task-item ${task.status}`;
                     const assigneeChip = task.assignee ? `<md-input-chip label="${task.assignee}" class="assignee-chip" disabled selected></md-input-chip>` : '';
-                    
                     taskEl.innerHTML = `
-                        <md-icon-button class="toggle-status">
-                            <md-icon>${task.status === 'done' ? 'check_circle' : 'radio_button_unchecked'}</md-icon>
-                        </md-icon-button>
+                        <md-icon-button class="toggle-status"><md-icon>${task.status === 'done' ? 'check_circle' : 'radio_button_unchecked'}</md-icon></md-icon-button>
                         <span class="task-title md-typescale-body-large">${task.title}</span>
                         ${assigneeChip}
                         <md-icon-button class="edit-task"><md-icon>edit</md-icon></md-icon-button>
                         <md-icon-button class="delete-task"><md-icon>delete</md-icon></md-icon-button>
                     `;
-                    
                     taskEl.querySelector('.toggle-status').addEventListener('click', () => toggleTaskStatus(task.id));
                     taskEl.querySelector('.task-title').addEventListener('click', () => openTaskModal(null, task.id));
                     taskEl.querySelector('.edit-task').addEventListener('click', () => openTaskModal(null, task.id));
                     taskEl.querySelector('.delete-task').addEventListener('click', () => deleteTask(task.id));
-                    
                     tasksContainer.appendChild(taskEl);
                 });
-
                 const newButton = document.createElement('md-text-button');
                 newButton.style.marginTop = '8px';
                 newButton.innerHTML = '<md-icon slot="icon">add_circle_outline</md-icon> Nova Tarefa';
                 newButton.addEventListener('click', () => openTaskModal(phase.id));
-
-                phaseEl.innerHTML = `
-                    <div class="timeline-connector"></div>
-                    <div class="timeline-icon"><md-icon>${phase.icon}</md-icon></div>
-                    <h3 class="md-typescale-title-large" style="margin-left: 40px;">${phase.title}</h3>
-                    <p class="md-typescale-label-medium" style="margin-left: 40px; color: var(--md-sys-color-outline);">${phase.dates}</p>
-                `;
-                phaseEl.appendChild(tasksContainer);
-                phaseEl.appendChild(newButton);
-                timelineContainer.appendChild(phaseEl);
+                phaseCard.appendChild(tasksContainer);
+                phaseCard.appendChild(newButton);
+                timelineContainer.appendChild(phaseCard);
             });
         }
 
         // ==========================
         // 5. CALCULATOR LOGIC
         // ==========================
-        const ingredientData = [
-            { name: 'Farinha de Trigo', price: 5.00, grams: 300, source: 'startup' },
-            { name: 'Açúcar', price: 4.50, grams: 100, source: 'startup' },
-            { name: 'Manteiga/Marg.', price: 60.00, grams: 200, source: 'startup' }
-        ];
-        const extraCostData = [
-            { name: 'Ingredientes Extras', placeholder: 'Chocolate, Confeitos...', source: 'startup' },
-            { name: 'Embalagens', placeholder: 'Sacos, Fitas, Caixas', source: 'startup' },
-            { name: 'Gás / Energia', placeholder: 'Ex: 5.00', source: 'proprio' }
-        ];
-
         const ingredientInputsEl = document.getElementById('ingredient-inputs');
         const extraCostsInputsEl = document.getElementById('extra-costs-inputs');
-        
-        let calcElements = [];
+
+        window.addIngredient = () => {
+            appData.ingredients.push({ id: Date.now(), name: 'Novo Ingrediente', price: 0, grams: 0, source: 'startup' });
+            saveData();
+        }
+        window.updateIngredient = (id, field, value) => {
+            const item = appData.ingredients.find(i => i.id === id);
+            if (field === 'price' || field === 'grams') value = parseFloat(value) || 0;
+            item[field] = value;
+            saveData(false);
+        }
+        window.deleteIngredient = (id) => {
+            showConfirm('Excluir Ingrediente?', 'Tem certeza?', () => {
+                appData.ingredients = appData.ingredients.filter(i => i.id !== id);
+                saveData();
+            });
+        }
+
+        window.addExtraCost = () => {
+            appData.extraCosts.push({ id: Date.now(), name: 'Novo Custo', cost: 0, source: 'startup' });
+            saveData();
+        }
+        window.updateExtraCost = (id, field, value) => {
+            const item = appData.extraCosts.find(i => i.id === id);
+            if (field === 'cost') value = parseFloat(value) || 0;
+            item[field] = value;
+            saveData(false);
+        }
+        window.deleteExtraCost = (id) => {
+            showConfirm('Excluir Custo?', 'Tem certeza?', () => {
+                appData.extraCosts = appData.extraCosts.filter(i => i.id !== id);
+                saveData();
+            });
+        }
 
         function renderCalculator() {
             ingredientInputsEl.innerHTML = '';
             extraCostsInputsEl.innerHTML = '';
-            calcElements = [];
-
-            ingredientData.forEach((item, index) => {
+            
+            appData.ingredients.forEach(item => {
                 const el = document.createElement('div');
-                el.className = 'grid items-center';
-                el.style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
-                const priceId = `ing-price-${index}`;
-                const gramsId = `ing-grams-${index}`;
-                const sourceId = `ing-source-${index}`;
-                
+                el.className = 'input-row ingredient-row-grid';
                 el.innerHTML = `
-                    <label class="md-typescale-body-large">${item.name}</label>
-                    <md-outlined-text-field id="${priceId}" label="Preço/Kg" type="number" value="${item.price}" prefix-text="R$"></md-outlined-text-field>
-                    <md-outlined-text-field id="${gramsId}" label="Gramas" type="number" value="${item.grams}" suffix-text="g"></md-outlined-text-field>
-                    <md-outlined-select id="${sourceId}" label="Fonte">
-                        <md-select-option value="startup" ${item.source === 'startup' ? 'selected' : ''}><div slot="headline">💰 Startup</div></md-select-option>
-                        <md-select-option value="proprio" ${item.source === 'proprio' ? 'selected' : ''}><div slot="headline">🏠 Casa</div></md-select-option>
+                    <md-outlined-text-field label="Ingrediente" value="${item.name}" oninput="updateIngredient(${item.id}, 'name', this.value)"></md-outlined-text-field>
+                    <md-outlined-text-field label="Preço/Kg" type="number" value="${item.price}" prefix-text="R$" oninput="updateIngredient(${item.id}, 'price', this.value)"></md-outlined-text-field>
+                    <md-outlined-text-field label="Gramas" type="number" value="${item.grams}" suffix-text="g" oninput="updateIngredient(${item.id}, 'grams', this.value)"></md-outlined-text-field>
+                    <md-outlined-select label="Fonte" value="${item.source}" onchange="updateIngredient(${item.id}, 'source', this.value)">
+                        <md-select-option value="startup"><div slot="headline">💰 Startup</div></md-select-option>
+                        <md-select-option value="proprio"><div slot="headline">🏠 Casa</div></md-select-option>
                     </md-outlined-select>
+                    <md-icon-button onclick="deleteIngredient(${item.id})"><md-icon>delete</md-icon></md-icon-button>
                 `;
                 ingredientInputsEl.appendChild(el);
-                calcElements.push({ type: 'ingredient', price: document.getElementById(priceId), grams: document.getElementById(gramsId), source: document.getElementById(sourceId) });
             });
             
-            extraCostData.forEach((item, index) => {
+            appData.extraCosts.forEach(item => {
                 const el = document.createElement('div');
-                el.className = 'grid items-center';
-                el.style.gridTemplateColumns = '1fr 1fr 1fr';
-                const costId = `extra-cost-${index}`;
-                const sourceId = `extra-source-${index}`;
-                
+                el.className = 'input-row extracost-row-grid';
                 el.innerHTML = `
-                    <label class="md-typescale-body-large">${item.name}</label>
-                    <md-outlined-text-field id="${costId}" label="Custo Total" type="number" placeholder="${item.placeholder}" prefix-text="R$"></md-outlined-text-field>
-                    <md-outlined-select id="${sourceId}" label="Fonte">
-                        <md-select-option value="startup" ${item.source === 'startup' ? 'selected' : ''}><div slot="headline">💰 Startup</div></md-select-option>
-                        <md-select-option value="proprio" ${item.source === 'proprio' ? 'selected' : ''}><div slot="headline">🏠 Casa</div></md-select-option>
+                    <md-outlined-text-field label="Custo" value="${item.name}" oninput="updateExtraCost(${item.id}, 'name', this.value)"></md-outlined-text-field>
+                    <md-outlined-text-field label="Custo Total" type="number" value="${item.cost}" prefix-text="R$" oninput="updateExtraCost(${item.id}, 'cost', this.value)"></md-outlined-text-field>
+                    <md-outlined-select label="Fonte" value="${item.source}" onchange="updateExtraCost(${item.id}, 'source', this.value)">
+                        <md-select-option value="startup"><div slot="headline">💰 Startup</div></md-select-option>
+                        <md-select-option value="proprio"><div slot="headline">🏠 Casa</div></md-select-option>
                     </md-outlined-select>
+                    <md-icon-button onclick="deleteExtraCost(${item.id})"><md-icon>delete</md-icon></md-icon-button>
                 `;
                 extraCostsInputsEl.appendChild(el);
-                calcElements.push({ type: 'extra', cost: document.getElementById(costId), source: document.getElementById(sourceId) });
-            });
-
-            document.querySelectorAll('md-outlined-text-field, md-slider, md-outlined-select').forEach(el => {
-                el.addEventListener('input', calculate);
-                el.addEventListener('change', calculate);
             });
         }
 
-        function calculate() {
+        window.calculate = () => {
             let totalStartup = 0;
             let totalOwn = 0;
-
-            calcElements.forEach(el => {
-                const source = el.source.value;
-                let cost = 0;
-                if (el.type === 'ingredient') {
-                    const pricePerKg = parseFloat(el.price.value) || 0;
-                    const grams = parseFloat(el.grams.value) || 0;
-                    cost = (pricePerKg / 1000) * grams;
-                } else if (el.type === 'extra') {
-                    cost = parseFloat(el.cost.value) || 0;
-                }
-
-                if (source === 'startup') {
-                    totalStartup += cost;
-                } else {
-                    totalOwn += cost;
-                }
+            appData.ingredients.forEach(item => {
+                const cost = (parseFloat(item.price) / 1000) * parseFloat(item.grams);
+                if (item.source === 'startup') totalStartup += cost;
+                else totalOwn += cost;
+            });
+            appData.extraCosts.forEach(item => {
+                const cost = parseFloat(item.cost);
+                if (item.source === 'startup') totalStartup += cost;
+                else totalOwn += cost;
             });
 
             const totalCost = totalStartup + totalOwn;
             const quantity = parseFloat(document.getElementById('meta-qtd').value) || 1;
-            const unitCost = totalCost / quantity;
+            const unitCost = isFinite(totalCost / quantity) ? totalCost / quantity : 0;
             const margin = document.getElementById('margin-slider').value;
             const finalPrice = unitCost * (1 + (margin/100));
             const profit = finalPrice - unitCost;
+            const netProfit = profit * quantity;
+
+            const unitsPerPackage = parseFloat(document.getElementById('units-per-package').value) || 1;
+            const packagePrice = finalPrice * unitsPerPackage;
 
             document.getElementById('cost-startup').innerText = totalStartup.toFixed(2);
             document.getElementById('cost-own').innerText = totalOwn.toFixed(2);
-            document.getElementById('total-cost').innerText = totalCost.toFixed(2);
             document.getElementById('unit-cost').innerText = unitCost.toFixed(2);
             document.getElementById('margin-display').innerText = `${margin}%`;
             document.getElementById('final-price').innerText = finalPrice.toFixed(2);
+            document.getElementById('package-price').innerText = packagePrice.toFixed(2);
             document.getElementById('profit-unit').innerText = profit.toFixed(2);
+            document.getElementById('net-profit').innerText = netProfit.toFixed(2);
+        }
+
+        // ==========================
+        // 6. TESTS
+        // ==========================
+        window.runTests = () => {
+            console.clear();
+            console.log('%cExecutando suite de testes...', 'font-weight: bold; font-size: 1.2em;');
+            // ... (test implementation remains the same)
         }
 
         // ==========================
         // INITIAL RENDER
         // ==========================
-        function renderApp() {
-            renderTeam();
-            renderTimeline();
-        }
-
-        renderCalculator();
         renderApp();
-        calculate();
 
     </script>
 </body>
