@@ -1,0 +1,22 @@
+[build]
+  publish = "."
+  command = "" # No build command needed for this static project
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Security headers
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Content-Type-Options = "nosniff"
+    
+    # Cache control for static assets (optional but recommended)
+    # Cache images for a week
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    # Do not cache HTML to ensure updates are seen immediately
+    Cache-Control = "public, max-age=0, must-revalidate"
