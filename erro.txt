@@ -1,5 +1,1 @@
---graphite: #2d2d2aff;
---brown-red: #a52422ff;
---golden-bronze: #c8963eff;
---sea-green: #519872ff;
---pitch-black: #1d1a05ff;
+depois que o usuário estabelece a meta de produção e define os preços e quantidades dos insumos, o sistema deve oferecer o preço que deve ser praticado por unidade para que as despesas sejam cobertas. A partir disso o usuário pode definir sua margem de lucro e o sistema exibe quanto seria o lucro líquido partindo da cobertura das despesas. Se a operação estiver gerando prejuízo o sistema deve destacar e avisar claramente o usuário. Tudo deve se refletir no gráfico, que será o apoio visual da operação.

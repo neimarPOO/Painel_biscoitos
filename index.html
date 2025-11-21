@@ -155,12 +155,23 @@
                             style="font-weight: bold;">50%</span></label>
                     <md-slider id="margin-slider" min="0" max="300" value="50" labeled ticks></md-slider>
 
-                    <md-outlined-text-field id="units-per-package" label="Unidades por Pacote" type="number" value="6"
-                        suffix-text="unidades" style="margin-top: 16px;"></md-outlined-text-field>
+                    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+                        <md-outlined-text-field id="units-per-package" label="Unidades por Pacote" type="number" value="6"
+                            suffix-text="unidades"></md-outlined-text-field>
+                        <md-outlined-text-field id="units-sold" label="Unidades Vendidas" type="number" value="0"
+                            suffix-text="unidades"></md-outlined-text-field>
+                    </div>
+
+                    <div style="background-color: var(--md-sys-color-surface-container-high); padding: 12px; border-radius: 8px; margin-top: 16px; border-left: 4px solid var(--md-sys-color-tertiary);">
+                        <p class="md-typescale-body-small" style="color: var(--md-sys-color-on-surface-variant);">Para cobrir os custos com as unidades vendidas, o preço sugerido é:</p>
+                        <p class="md-typescale-title-medium" style="text-align: center; margin-top: 4px;">
+                            R$ <span id="suggested-price">0.00</span> / unidade
+                        </p>
+                    </div>
 
                     <div
                         style="background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); padding: 16px; border-radius: 12px; text-align: center; margin-top: 16px;">
-                        <p class="md-typescale-label-large">PREÇO DE VENDA</p>
+                        <p class="md-typescale-label-large">PREÇO DE VENDA (com sua margem)</p>
                         <p class="md-typescale-display-small">R$ <span id="final-price">0.00</span> / unidade</p>
                         <p class="md-typescale-headline-small" style="margin-top: 8px;">R$ <span
                                 id="package-price">0.00</span> / pacote</p>

@@ -219,6 +219,13 @@ md-primary-tab:hover {
     filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 0.2));
 }
 
+.input-row {
+    margin-bottom: 16px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
 /* Task Items */
 .task-item {
     display: flex;
@@ -246,6 +253,11 @@ md-primary-tab:hover {
     color: var(--christmas-white);
 }
 
+.text-danger {
+    color: var(--christmas-red) !important;
+    font-weight: bold;
+}
+
 .task-item.done {
     opacity: 0.6;
     background-color: #e0e0e0;
@@ -259,6 +271,20 @@ md-primary-tab:hover {
     justify-content: center;
     gap: 16px;
     box-shadow: 0px -4px 0px var(--christmas-red);
+}
+
+footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background-color: var(--navbar-bg);
+    color: var(--christmas-white);
+    border-top: var(--border-thickness) solid var(--christmas-black);
+    margin-top: 48px;
+    gap: 16px;
+    text-align: center;
 }
 
 .footer-logo {

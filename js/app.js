@@ -45,6 +45,7 @@ function setupEventListeners() {
     document.getElementById('meta-qtd').addEventListener('input', calculate);
     document.getElementById('margin-slider').addEventListener('input', calculate);
     document.getElementById('units-per-package').addEventListener('input', calculate);
+    document.getElementById('units-sold').addEventListener('input', calculate);
 
     // Calculator Add Buttons
     document.querySelector('md-text-button[onclick="addIngredient()"]').onclick = null;
@@ -216,14 +217,25 @@ function calculate() {
 
     const totalCost = totalStartup + totalOwn;
     const quantity = parseFloat(document.getElementById('meta-qtd').value) || 1;
-    const unitCost = isFinite(totalCost / quantity) ? totalCost / quantity : 0;
+    const unitsSold = parseFloat(document.getElementById('units-sold').value) || 0;
+
+    // 1. Preço de Equilíbrio (para cobrir custos com as unidades vendidas)
+    const suggestedPrice = (unitsSold > 0) ? (totalCost / unitsSold) : 0;
+    
+    // 2. Preço Final (baseado no equilíbrio + margem de lucro)
     const margin = document.getElementById('margin-slider').value;
-    const finalPrice = unitCost * (1 + (margin / 100));
-    const profit = finalPrice - unitCost;
-    const netProfit = profit * quantity;
+    const finalPrice = suggestedPrice * (1 + (margin / 100));
+    
+    // 3. Lucros (baseado no novo preço final)
+    const unitCost = isFinite(totalCost / quantity) ? totalCost / quantity : 0; // Custo de produção por item
+    const profit = finalPrice - unitCost; // Lucro real por unidade vendida, considerando o custo de produção
+    const netProfit = (finalPrice * unitsSold) - totalCost;
 
     const unitsPerPackage = parseFloat(document.getElementById('units-per-package').value) || 1;
     const packagePrice = finalPrice * unitsPerPackage;
 
-    updateCalculationUI(totalStartup, totalOwn, unitCost, margin, finalPrice, packagePrice, profit, netProfit);
+    const totalRevenue = finalPrice * unitsSold;
+    const chartData = { totalCost, totalRevenue, netProfit };
+
+    updateCalculationUI(totalStartup, totalOwn, unitCost, margin, finalPrice, packagePrice, profit, netProfit, suggestedPrice, chartData);
 }

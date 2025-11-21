@@ -173,7 +173,7 @@ export function renderCalculator(updateIngredientCallback, deleteIngredientCallb
     });
 }
 
-export function updateChart(startup, own, profit) {
+export function updateChart(totalCost, totalRevenue, netProfit) {
     const ctx = document.getElementById('results-chart').getContext('2d');
 
     const style = getComputedStyle(document.body);
@@ -182,27 +182,27 @@ export function updateChart(startup, own, profit) {
     const gold = style.getPropertyValue('--christmas-gold').trim();
     const black = style.getPropertyValue('--christmas-black').trim();
 
+    const resultColor = netProfit < 0 ? red : gold;
+
     // Data for Bar Chart
     const data = {
-        labels: ['Custo Startup', 'Custo Próprio', 'Lucro Líquido'],
+        labels: ['Custo Total', 'Receita Total', 'Resultado'],
         datasets: [{
             label: 'Valores (R$)',
-            data: [startup, own, profit],
+            data: [totalCost, totalRevenue, netProfit],
             backgroundColor: [
-                green, // Startup Cost -> Green (Investment)
-                red,   // Own Cost -> Red (Expense)
-                gold   // Profit -> Gold (Reward)
+                green, // Custo Total (Investimento)
+                gold,   // Receita Total (Entrada)
+                resultColor   // Resultado (Lucro/Prejuízo)
             ],
             borderColor: black,
-            borderWidth: 3, // Thick border for Neobrutalism
+            borderWidth: 3,
             barPercentage: 0.6
         }]
     };
 
     if (resultsChart) {
-        resultsChart.config.type = 'bar'; // Ensure type is updated if switching
         resultsChart.data = data;
-        resultsChart.options.plugins.legend.display = false; // Hide legend for simple bar
         resultsChart.update();
     } else {
         resultsChart = new Chart(ctx, {
@@ -221,7 +221,7 @@ export function updateChart(startup, own, profit) {
                         bodyColor: '#fff',
                         borderColor: '#fff',
                         borderWidth: 1,
-                        cornerRadius: 0, // Sharp corners
+                        cornerRadius: 0,
                         displayColors: false
                     }
                 },
@@ -264,7 +264,7 @@ export function updateChart(startup, own, profit) {
     }
 }
 
-export function updateCalculationUI(totalStartup, totalOwn, unitCost, margin, finalPrice, packagePrice, profit, netProfit) {
+export function updateCalculationUI(totalStartup, totalOwn, unitCost, margin, finalPrice, packagePrice, profit, netProfit, suggestedPrice, chartData) {
     document.getElementById('cost-startup').innerText = totalStartup.toFixed(2);
     document.getElementById('cost-own').innerText = totalOwn.toFixed(2);
     document.getElementById('unit-cost').innerText = unitCost.toFixed(2);
@@ -272,7 +272,11 @@ export function updateCalculationUI(totalStartup, totalOwn, unitCost, margin, fi
     document.getElementById('final-price').innerText = finalPrice.toFixed(2);
     document.getElementById('package-price').innerText = packagePrice.toFixed(2);
     document.getElementById('profit-unit').innerText = profit.toFixed(2);
-    document.getElementById('net-profit').innerText = netProfit.toFixed(2);
+    document.getElementById('suggested-price').innerText = suggestedPrice.toFixed(2);
 
-    updateChart(totalStartup, totalOwn, netProfit);
+    const netProfitEl = document.getElementById('net-profit');
+    netProfitEl.innerText = netProfit.toFixed(2);
+    netProfitEl.parentElement.classList.toggle('text-danger', netProfit < 0);
+
+    updateChart(chartData.totalCost, chartData.totalRevenue, chartData.netProfit);
 }
