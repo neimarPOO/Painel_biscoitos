@@ -179,35 +179,83 @@ export function updateChart(startup, own, profit) {
     const style = getComputedStyle(document.body);
     const red = style.getPropertyValue('--christmas-red').trim();
     const green = style.getPropertyValue('--christmas-green').trim();
-    const surfaceContainer = style.getPropertyValue('--md-sys-color-surface-container').trim();
-    const onSurface = style.getPropertyValue('--christmas-white').trim();
+    const gold = style.getPropertyValue('--christmas-gold').trim();
+    const black = style.getPropertyValue('--christmas-black').trim();
 
-    const expenses = startup + own;
-
+    // Data for Bar Chart
     const data = {
-        labels: ['Despesas', 'Lucro'],
+        labels: ['Custo Startup', 'Custo Próprio', 'Lucro Líquido'],
         datasets: [{
-            data: [expenses, profit],
-            backgroundColor: [red, green],
-            borderColor: surfaceContainer,
-            borderWidth: 2
+            label: 'Valores (R$)',
+            data: [startup, own, profit],
+            backgroundColor: [
+                green, // Startup Cost -> Green (Investment)
+                red,   // Own Cost -> Red (Expense)
+                gold   // Profit -> Gold (Reward)
+            ],
+            borderColor: black,
+            borderWidth: 3, // Thick border for Neobrutalism
+            barPercentage: 0.6
         }]
     };
 
     if (resultsChart) {
+        resultsChart.config.type = 'bar'; // Ensure type is updated if switching
         resultsChart.data = data;
+        resultsChart.options.plugins.legend.display = false; // Hide legend for simple bar
         resultsChart.update();
     } else {
         resultsChart = new Chart(ctx, {
-            type: 'doughnut',
+            type: 'bar',
             data: data,
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'top',
-                        labels: {
-                            color: onSurface
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: black,
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#fff',
+                        borderWidth: 1,
+                        cornerRadius: 0, // Sharp corners
+                        displayColors: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#e0e0e0',
+                            lineWidth: 2
+                        },
+                        ticks: {
+                            color: black,
+                            font: {
+                                weight: 'bold'
+                            }
+                        },
+                        border: {
+                            width: 3,
+                            color: black
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: black,
+                            font: {
+                                weight: 'bold'
+                            }
+                        },
+                        border: {
+                            width: 3,
+                            color: black
                         }
                     }
                 }

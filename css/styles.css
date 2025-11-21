@@ -1,114 +1,103 @@
-/* Light Theme (Default) */
+/* Soft Artistic Christmas Theme - Neobrutalist Refined */
 :root {
-    /* Palette Refinement */
-    --christmas-green: #1b5e20;
-    /* Deeper, richer green */
-    --christmas-red: #b71c1c;
-    /* Elegant dark red */
-    --christmas-gold: #ffd700;
-    /* Classic Gold */
-    --christmas-white: #f5f5f5;
-    /* Soft white */
+    /* User Provided Palette */
+    --graphite: #2d2d2aff;
+    --brown-red: #a52422ff;
+    --golden-bronze: #c8963eff;
+    --sea-green: #519872ff;
+    --pitch-black: #1d1a05ff;
 
-    /* Glassmorphism Variables */
-    --glass-bg: rgba(255, 255, 255, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.5);
-    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-    --card-bg: rgba(255, 255, 255, 0.9);
+    /* Mapping to Functional Variables */
+    --christmas-green: var(--sea-green);
+    --christmas-red: var(--brown-red);
+    --christmas-gold: var(--golden-bronze);
+    --christmas-white: #F5F5F0;
+    /* Soft off-white for contrast */
+    --christmas-black: var(--pitch-black);
 
-    /* Material Sys Overrides for Theme Integration */
-    --md-sys-color-primary: #2E7D32;
-    /* Match Christmas Green */
-    --md-sys-color-on-primary: #FFFFFF;
-    --md-sys-color-primary-container: #E8F5E9;
-    --md-sys-color-on-primary-container: #000000;
-    --md-sys-color-secondary: #C62828;
-    /* Match Christmas Red */
-    --md-sys-color-on-secondary: #FFFFFF;
-    --md-sys-color-surface: #FFFFFF;
-    --md-sys-color-on-surface: #1C1B1F;
-    --md-sys-color-outline: #79747E;
-    --md-sys-color-background: #fdfdfd;
+    /* Neobrutalist Variables */
+    --border-thickness: 3px;
+    --shadow-offset: 4px;
+    --hard-shadow: var(--shadow-offset) var(--shadow-offset) 0px var(--christmas-black);
+    --card-bg: #FFFFFF;
+    --navbar-bg: var(--christmas-green);
+
+    /* Material Sys Overrides */
+    --md-sys-color-primary: var(--christmas-green);
+    --md-sys-color-on-primary: var(--christmas-white);
+    --md-sys-color-primary-container: var(--christmas-white);
+    --md-sys-color-on-primary-container: var(--christmas-black);
+    --md-sys-color-secondary: var(--christmas-red);
+    --md-sys-color-on-secondary: var(--christmas-white);
+    --md-sys-color-surface: var(--christmas-white);
+    --md-sys-color-on-surface: var(--christmas-black);
+    --md-sys-color-outline: var(--christmas-black);
+    --md-sys-color-background: #F0F0F0;
 }
 
-/* Dark Theme */
+/* Dark Theme - Muted & Elegant */
 body.dark-theme {
-    --glass-bg: rgba(20, 20, 20, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-    --card-bg: rgba(30, 30, 30, 0.9);
-
-    --md-sys-color-primary: #81c784;
-    /* Lighter green for dark mode */
-    --md-sys-color-on-primary: #003300;
-    --md-sys-color-primary-container: #2e7d32;
-    --md-sys-color-on-primary-container: #ffffff;
-    --md-sys-color-secondary: #e57373;
-    /* Lighter red */
-    --md-sys-color-on-secondary: #4a0000;
-    --md-sys-color-surface: #121212;
-    --md-sys-color-on-surface: #E6E1E5;
+    --christmas-white: #1a1a1a;
+    --card-bg: #2b2b2b;
+    --navbar-bg: #1d1a05;
+    /* Pitch black navbar */
     --md-sys-color-background: #121212;
+    --md-sys-color-on-surface: #c8963e;
+    /* Golden text */
+    --md-sys-color-outline: #c8963e;
+    --christmas-black: #c8963e;
+    /* Borders become gold */
+    --hard-shadow: var(--shadow-offset) var(--shadow-offset) 0px #a52422;
+    /* Red shadows */
 }
 
 body {
     font-family: 'Roboto', sans-serif;
     background-color: var(--md-sys-color-background);
-    color: var(--md-sys-color-on-background);
+    color: var(--md-sys-color-on-surface);
     transition: background-color 0.3s ease, color 0.3s ease;
     margin: 0;
     min-height: 100vh;
-}
 
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('../fundo_novo.png');
+    /* Soft Artistic Background Image */
+    background-image: url('../fundo_suave.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    z-index: -1;
-    opacity: 0.15;
-    /* Slightly reduced opacity for better text readability */
-    transition: opacity 0.3s ease;
     background-repeat: no-repeat;
 }
 
+/* Remove old background image overlay elements if any */
+body::before {
+    display: none;
+}
+
 body.dark-theme::before {
-    opacity: 0.1;
+    display: none;
 }
 
 .main-content {
     max-width: 1200px;
     margin: 0 auto;
     padding: 24px 16px;
-    /* Increased top/bottom padding */
 }
 
-/* Navbar with Glassmorphism */
+/* Navbar - Soft & Elegant */
 .custom-navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 32px;
-    background: rgba(27, 94, 32, 0.95);
-    /* Semi-transparent green */
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    padding: 16px 32px;
+    background: var(--navbar-bg);
+    border-bottom: var(--border-thickness) solid var(--christmas-black);
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 100;
-    height: 72px;
-    /* Slightly taller */
+    height: 96px;
     box-sizing: border-box;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--hard-shadow);
 }
 
 .navbar-center {
@@ -117,80 +106,96 @@ body.dark-theme::before {
 }
 
 .navbar-title {
-    font-size: 1.5rem;
-    /* Larger title */
-    color: #ffffff;
+    font-size: 2rem;
+    color: var(--christmas-white);
     display: block;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-shadow: 2px 2px 0px var(--christmas-black);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .navbar-subtitle {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    color: var(--christmas-white);
     display: block;
-    font-weight: 300;
+    font-weight: 500;
     letter-spacing: 0.5px;
 }
 
-/* Typography Refinements */
+/* Typography Refinements - Mountains of Christmas */
 .navbar-title,
 h3,
 .md-typescale-title-medium,
 .md-typescale-title-large,
 #dialog-title {
-    font-family: 'Berkshire Swash', cursive !important;
-    font-weight: 400;
+    font-family: 'Mountains of Christmas', cursive !important;
+    font-weight: 700;
 }
 
 /* Tabs Styling */
 md-tabs {
-    background: transparent;
-    height: 64px;
-    margin-top: 80px;
-    /* Adjust for fixed navbar */
-    margin-bottom: 24px;
+    background: var(--christmas-white);
+    height: auto;
+    min-height: 64px;
+    margin-top: 130px;
+    margin-bottom: 32px;
     border-bottom: none;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 0;
+    padding: 8px;
+    box-shadow: var(--hard-shadow);
+    border: var(--border-thickness) solid var(--christmas-black);
+
     --md-primary-tab-container-color: transparent;
-    --md-primary-tab-label-text-color: var(--md-sys-color-on-surface);
-    --md-primary-tab-active-indicator-color: var(--christmas-red);
-    --md-primary-tab-active-label-text-color: var(--christmas-red);
+    --md-primary-tab-label-text-color: var(--christmas-black);
+    --md-primary-tab-active-indicator-color: var(--christmas-black);
+    --md-primary-tab-active-label-text-color: var(--christmas-black);
 }
 
 md-primary-tab {
-    font-family: 'Berkshire Swash', cursive;
-    font-size: 1.1rem;
+    font-family: 'Mountains of Christmas', cursive;
+    font-size: 1.3rem;
+    border: 2px solid transparent;
+    font-weight: 700;
+    transition: all 0.2s ease;
 }
 
-/* Tab Panels - Critical for visibility toggling */
+/* Hover Inversion for Tabs */
+md-primary-tab:hover {
+    background-color: var(--christmas-black);
+    color: var(--christmas-white);
+    --md-primary-tab-label-text-color: var(--christmas-white);
+    --md-primary-tab-active-label-text-color: var(--christmas-white);
+}
+
+/* Tab Panels */
 .tab-panel {
     display: none;
 }
 
 .tab-panel.active {
     display: block;
-    animation: fadeIn 0.4s ease-out;
+    animation: none;
 }
 
-/* Card Styling - The Core of the Redesign */
+/* Card Styling */
 .card {
     background: var(--card-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-radius: 16px;
-    /* More rounded */
+    border-radius: 0px;
     padding: 24px;
-    /* More whitespace */
     margin-bottom: 24px;
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: var(--border-thickness) solid var(--christmas-black);
+    box-shadow: var(--hard-shadow);
     color: var(--md-sys-color-on-surface);
-    /* Use system color for text in cards */
+    transition: transform 0.1s ease;
 }
 
 .card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    transform: translate(-2px, -2px);
+    box-shadow: calc(var(--shadow-offset) + 2px) calc(var(--shadow-offset) + 2px) 0px var(--christmas-black);
 }
 
 .card-header {
@@ -199,20 +204,19 @@ md-primary-tab {
     gap: 16px;
     margin-bottom: 20px;
     padding-bottom: 16px;
-    border-bottom: 2px solid rgba(198, 40, 40, 0.1);
-    /* Subtle red divider */
+    border-bottom: var(--border-thickness) solid var(--christmas-black);
 }
 
 .card-header h3 {
     margin: 0;
-    font-size: 1.5rem;
-    color: var(--christmas-red);
-    /* Highlight headers with red */
+    font-size: 1.8rem;
+    color: var(--christmas-black);
 }
 
 .card-header md-icon {
     color: var(--christmas-green);
-    font-size: 28px;
+    font-size: 32px;
+    filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 0.2));
 }
 
 /* Task Items */
@@ -221,173 +225,52 @@ md-primary-tab {
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    border-radius: 12px;
-    background-color: var(--md-sys-color-surface-container-low);
+    border-radius: 0;
+    background-color: var(--christmas-white);
     margin-bottom: 12px;
-    transition: background-color 0.2s ease;
-    border: 1px solid transparent;
+    border: 2px solid var(--christmas-black);
+    box-shadow: 2px 2px 0px var(--christmas-black);
+    transition: transform 0.1s, background-color 0.2s, color 0.2s;
 }
 
+/* Hover Inversion for Task Items */
 .task-item:hover {
-    background-color: var(--md-sys-color-surface-container);
-    border-color: var(--md-sys-color-outline-variant);
+    background-color: var(--christmas-black);
+    color: var(--christmas-white);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px var(--christmas-green);
+}
+
+.task-item:hover .task-title,
+.task-item:hover md-icon {
+    color: var(--christmas-white);
 }
 
 .task-item.done {
     opacity: 0.6;
-    background-color: transparent;
-    border: 1px dashed var(--md-sys-color-outline-variant);
-}
-
-.task-item.done .task-title {
-    text-decoration: line-through;
-    color: var(--md-sys-color-on-surface-variant);
-}
-
-.task-title {
-    flex-grow: 1;
-    cursor: pointer;
-    font-weight: 500;
-    color: var(--md-sys-color-on-surface);
-}
-
-/* Inputs & Controls */
-md-outlined-text-field,
-md-outlined-select {
-    --md-outlined-text-field-container-shape: 12px;
-    --md-outlined-select-container-shape: 12px;
-}
-
-/* Input Rows & Grids for Calculator */
-.input-row {
-    display: grid;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
-    padding: 8px;
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 12px;
-}
-
-.input-row:last-child {
-    margin-bottom: 0;
-}
-
-.ingredient-row-grid {
-    grid-template-columns: 2fr 1fr 1fr 1fr auto;
-}
-
-.extracost-row-grid {
-    grid-template-columns: 2fr 1fr 1fr auto;
-}
-
-@media (max-width: 768px) {
-
-    .ingredient-row-grid,
-    .extracost-row-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-        background: rgba(255, 255, 255, 0.3);
-        padding: 16px;
-    }
-}
-
-/* Grids */
-.timeline-grid {
-    display: grid;
-    gap: 24px;
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-}
-
-.calculator-grid {
-    display: grid;
-    gap: 32px;
-    grid-template-columns: 1.8fr 1.2fr;
-    /* Adjusted ratio */
-    align-items: start;
-}
-
-/* Result Card Special Styling */
-.result-card {
-    position: sticky;
-    top: 100px;
-    background: linear-gradient(145deg, var(--card-bg), rgba(255, 255, 255, 0.95));
-    border: 1px solid var(--christmas-gold);
-    /* Gold border for results */
-}
-
-body.dark-theme .result-card {
-    background: linear-gradient(145deg, var(--card-bg), rgba(40, 40, 40, 0.95));
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.card,
-.task-item {
-    animation: fadeIn 0.5s ease-out forwards;
-}
-
-/* Responsive */
-@media (max-width: 960px) {
-    .calculator-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .result-card {
-        position: static;
-        margin-top: 24px;
-    }
-}
-
-@media (max-width: 600px) {
-    .navbar-title {
-        display: none;
-    }
-
-    .custom-navbar {
-        padding: 8px 16px;
-    }
-
-    .timeline-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Footer */
-footer {
-    background-color: var(--christmas-green);
-    color: rgba(255, 255, 255, 0.9);
+    background-color: #e0e0e0;
+    border: 2px dashed var(--christmas-black);
     padding: 32px 24px;
     margin-top: 64px;
-    border-top: 4px solid var(--christmas-gold);
+    border-top: var(--border-thickness) solid var(--christmas-green);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 16px;
+    box-shadow: 0px -4px 0px var(--christmas-red);
 }
 
 .footer-logo {
     height: 80px;
-    /* Slightly larger */
     width: auto;
-    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+    filter: drop-shadow(0 0 5px var(--christmas-green));
 }
 
 footer p {
     margin: 0;
     font-size: 0.9rem;
     letter-spacing: 1px;
-    font-weight: 300;
+    font-weight: 700;
+    text-transform: uppercase;
 }
