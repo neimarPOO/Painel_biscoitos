@@ -219,17 +219,20 @@ function calculate() {
     const quantity = parseFloat(document.getElementById('meta-qtd').value) || 1;
     const unitsSold = parseFloat(document.getElementById('units-sold').value) || 0;
 
-    // 1. Preço de Equilíbrio (para cobrir custos com as unidades vendidas)
+    // 1. Custo por unidade
+    const unitCost = isFinite(totalCost / quantity) ? totalCost / quantity : 0;
+
+    // 2. Preço de Equilíbrio (para cobrir os custos TOTAIS com as unidades vendidas)
+    // This is the "suggested price" the user was missing.
     const suggestedPrice = (unitsSold > 0) ? (totalCost / unitsSold) : 0;
-    
-    // 2. Preço Final (baseado no equilíbrio + margem de lucro)
+
+    // 3. Preço Final (baseado no custo unitário + margem de lucro)
     const margin = document.getElementById('margin-slider').value;
-    const finalPrice = suggestedPrice * (1 + (margin / 100));
-    
-    // 3. Lucros (baseado no novo preço final)
-    const unitCost = isFinite(totalCost / quantity) ? totalCost / quantity : 0; // Custo de produção por item
-    const profit = finalPrice - unitCost; // Lucro real por unidade vendida, considerando o custo de produção
-    const netProfit = (finalPrice * unitsSold) - totalCost;
+    const finalPrice = unitCost * (1 + (margin / 100));
+
+    // 4. Lucros (usando o Preço Final)
+    const profit = finalPrice - unitCost; // Lucro por unidade vendida
+    const netProfit = (finalPrice * unitsSold) - totalCost; // Lucro líquido total
 
     const unitsPerPackage = parseFloat(document.getElementById('units-per-package').value) || 1;
     const packagePrice = finalPrice * unitsPerPackage;
