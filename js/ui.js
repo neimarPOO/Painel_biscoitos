@@ -1,4 +1,4 @@
-import { appData, saveData, phasesConfig } from './data.js';
+import { appData, fetchAndPopulateAppData, deleteMemberDB, updateTaskDB, deleteTaskDB, phasesConfig } from './data.js';
 import { showConfirm } from './utils.js';
 
 // ==========================
@@ -11,13 +11,13 @@ export function renderTeam() {
     teamList.innerHTML = '';
     noMembersMsg.style.display = (!appData.members || appData.members.length === 0) ? 'block' : 'none';
 
-    appData.members?.forEach((member, index) => {
+    appData.members?.forEach(member => { // member is now an object {id, name}
         const chip = document.createElement('md-input-chip');
-        chip.label = member;
+        chip.label = member.name; // Use member.name
         chip.selected = true;
-        chip.addEventListener('remove', () => {
-            appData.members.splice(index, 1);
-            saveData(renderTeam);
+        chip.addEventListener('remove', async () => { // Make async
+            await deleteMemberDB(member.id); // Call delete from DB
+            await fetchAndPopulateAppData(renderTeam); // Re-fetch and render team
         });
         teamList.appendChild(chip);
     });
@@ -50,7 +50,7 @@ export function renderTimeline(openTaskModalCallback) {
     phasesConfig.forEach(phase => {
         const phaseCard = document.createElement('div');
         phaseCard.className = 'card';
-        const phaseTasks = appData.tasks.filter(t => t.phaseId === phase.id);
+        const phaseTasks = appData.tasks.filter(t => t.phase_id === phase.id); // Use phase_id
 
         phaseCard.innerHTML = `
             <div class="card-header">
@@ -78,9 +78,10 @@ export function renderTimeline(openTaskModalCallback) {
                 <md-icon-button class="delete-task"><md-icon>delete</md-icon></md-icon-button>
             `;
 
-            taskEl.querySelector('.toggle-status').addEventListener('click', () => {
-                task.status = (task.status === 'todo') ? 'done' : 'todo';
-                saveData(() => {
+            taskEl.querySelector('.toggle-status').addEventListener('click', async () => { // Make async
+                const newStatus = (task.status === 'todo') ? 'done' : 'todo';
+                await updateTaskDB(task.id, { status: newStatus }); // Update DB
+                await fetchAndPopulateAppData(() => { // Re-fetch and render
                     renderTimeline(openTaskModalCallback);
                     renderProgress();
                 });
@@ -89,15 +90,12 @@ export function renderTimeline(openTaskModalCallback) {
             taskEl.querySelector('.task-title').addEventListener('click', () => openTaskModalCallback(null, task.id));
             taskEl.querySelector('.edit-task').addEventListener('click', () => openTaskModalCallback(null, task.id));
             taskEl.querySelector('.delete-task').addEventListener('click', () => {
-                showConfirm("Excluir Tarefa?", "Tem certeza que deseja excluir esta tarefa?", () => {
-                    const idx = appData.tasks.findIndex(t => t.id === task.id);
-                    if (idx > -1) {
-                        appData.tasks.splice(idx, 1);
-                        saveData(() => {
-                            renderTimeline(openTaskModalCallback);
-                            renderProgress();
-                        });
-                    }
+                showConfirm("Excluir Tarefa?", "Tem certeza que deseja excluir esta tarefa?", async () => { // Make async
+                    await deleteTaskDB(task.id); // Delete from DB
+                    await fetchAndPopulateAppData(() => { // Re-fetch and render
+                        renderTimeline(openTaskModalCallback);
+                        renderProgress();
+                    });
                 });
             });
 

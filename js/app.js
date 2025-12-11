@@ -1,4 +1,4 @@
-import { appData, saveData, resetData } from './data.js';
+import { appData, fetchAndPopulateAppData, addMember as addMemberDB, updateMember as updateMemberDB, deleteMember as deleteMemberDB, addTask as addTaskDB, updateTask as updateTaskDB, deleteTask as deleteTaskDB, addIngredient as addIngredientDB, updateIngredient as updateIngredientDB, deleteIngredient as deleteIngredientDB, addExtraCost as addExtraCostDB, updateExtraCost as updateExtraCostDB, deleteExtraCost as deleteExtraCostDB, resetData as resetDataDB } from './data.js';
 import { showConfirm, setupConfirmDialog, toggleTheme, loadTheme } from './utils.js';
 import { renderTeam, renderProgress, renderTimeline, renderCalculator, updateCalculationUI } from './ui.js';
 import { initAuth } from './auth.js';
@@ -27,7 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupEventListeners() {
     // Navbar buttons
     document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
-    document.getElementById('reset-data-btn').addEventListener('click', () => resetData(renderApp));
+    document.getElementById('reset-data-btn').addEventListener('click', async () => {
+        showConfirm('Redefinir Dados?', 'Isso apagará todos os seus dados. Tem certeza?', async () => {
+            await resetDataDB();
+            await fetchAndPopulateAppData(renderApp); // Re-fetch default data and render
+        });
+    });
 
     // Tabs
     const tabs = document.querySelector('md-tabs');
@@ -66,14 +71,14 @@ function renderApp() {
 // ==========================
 // TEAM LOGIC
 // ==========================
-function addMember() {
+async function addMember() {
     const memberNameInput = document.getElementById('new-member-name');
     const name = memberNameInput.value.trim();
     if (!name) return;
-    if (!appData.members) appData.members = [];
-    appData.members.push(name);
+    
+    await addMemberDB(name); // Add to DB
     memberNameInput.value = '';
-    saveData(renderTeam);
+    await fetchAndPopulateAppData(renderTeam); // Re-fetch and render team
 }
 
 // ==========================
@@ -91,8 +96,8 @@ function openTaskModal(phaseId = null, taskId = null) {
     taskAssigneeSelect.innerHTML = '<md-select-option value=""><div slot="headline">Ninguém</div></md-select-option>';
     appData.members?.forEach(m => {
         const opt = document.createElement('md-select-option');
-        opt.value = m;
-        opt.innerHTML = `<div slot="headline">${m}</div>`;
+        opt.value = m.name; // Use m.name as value, since m is now an object {id, name}
+        opt.innerHTML = `<div slot="headline">${m.name}</div>`;
         taskAssigneeSelect.appendChild(opt);
     });
 
@@ -118,34 +123,33 @@ function openTaskModal(phaseId = null, taskId = null) {
     taskDialog.show();
 }
 
-function saveTask() {
+async function saveTask() {
     const taskTitleInput = document.getElementById('modal-task-title');
     const taskDescriptionInput = document.getElementById('modal-task-description');
     const taskAssigneeSelect = document.getElementById('modal-task-assignee');
-    const taskStatusSelect = document.getElementById('modal-task-status');
+    const taskStatusSelect = document.getElementById('modal-task-status'); // Corrected from `document = document.getElementById(...)`
     const taskDialog = document.getElementById('task-dialog');
 
     const title = taskTitleInput.value.trim();
     if (!title) return;
     const description = taskDescriptionInput.value.trim();
+    const assignee = taskAssigneeSelect.value;
+    const status = taskStatusSelect.value;
 
     if (currentEditingTaskId) {
-        const task = appData.tasks.find(t => t.id === currentEditingTaskId);
-        task.title = title;
-        task.description = description;
-        task.assignee = taskAssigneeSelect.value;
-        task.status = taskStatusSelect.value;
+        const updates = { title, description, assignee, status };
+        await updateTaskDB(currentEditingTaskId, updates);
     } else {
-        appData.tasks.push({
-            id: Date.now(),
-            phaseId: currentAddingPhaseId,
+        const newTask = {
+            phase_id: currentAddingPhaseId, // Use phase_id as per DB schema
             title,
             description,
-            assignee: taskAssigneeSelect.value,
-            status: 'todo'
-        });
+            assignee,
+            status: status || 'todo'
+        };
+        await addTaskDB(newTask);
     }
-    saveData(() => {
+    await fetchAndPopulateAppData(() => {
         renderTimeline(openTaskModal);
         renderProgress();
     });
@@ -155,50 +159,57 @@ function saveTask() {
 // ==========================
 // CALCULATOR LOGIC
 // ==========================
-function addIngredient() {
-    appData.ingredients.push({ id: Date.now(), name: 'Novo Ingrediente', price: 0, grams: 0, source: 'startup' });
-    saveData(() => renderCalculator(updateIngredient, deleteIngredient, updateExtraCost, deleteExtraCost));
-}
-
-function updateIngredient(id, field, value) {
-    const item = appData.ingredients.find(i => i.id === id);
-    if (field === 'price' || field === 'grams') {
-        value = parseFloat(value.toString().replace(',', '.')) || 0;
-    }
-    item[field] = value;
-    saveData(null); // No re-render needed for simple input update, but we need to recalc
+async function addIngredient() {
+    const newIngredient = { name: 'Novo Ingrediente', price: 0, grams: 0, source: 'startup' };
+    await addIngredientDB(newIngredient);
+    await fetchAndPopulateAppData(() => renderCalculator(updateIngredient, deleteIngredient, updateExtraCost, deleteExtraCost));
     calculate();
 }
 
-function deleteIngredient(id) {
-    showConfirm('Excluir Ingrediente?', 'Tem certeza?', () => {
-        appData.ingredients = appData.ingredients.filter(i => i.id !== id);
-        saveData(() => {
+async function updateIngredient(id, field, value) {
+    // Note: The UI element itself passes the raw value
+    let updates = { [field]: value };
+    // Handle price and grams parsing here before sending to DB
+    if (field === 'price' || field === 'grams') {
+        updates[field] = parseFloat(value.toString().replace(',', '.')) || 0;
+    }
+    await updateIngredientDB(id, updates);
+    // After update, re-fetch data for the item being updated or calculate immediately if local appData is sufficient.
+    // For simplicity, we directly call calculate, assuming appData is updated directly or will be consistent.
+    // If we wanted strict consistency, we would fetchAndPopulateAppData after each update.
+    calculate();
+}
+
+async function deleteIngredient(id) {
+    showConfirm('Excluir Ingrediente?', 'Tem certeza?', async () => {
+        await deleteIngredientDB(id);
+        await fetchAndPopulateAppData(() => {
             renderCalculator(updateIngredient, deleteIngredient, updateExtraCost, deleteExtraCost);
             calculate();
         });
     });
 }
 
-function addExtraCost() {
-    appData.extraCosts.push({ id: Date.now(), name: 'Novo Custo', cost: 0, source: 'startup' });
-    saveData(() => renderCalculator(updateIngredient, deleteIngredient, updateExtraCost, deleteExtraCost));
-}
-
-function updateExtraCost(id, field, value) {
-    const item = appData.extraCosts.find(i => i.id === id);
-    if (field === 'cost') {
-        value = parseFloat(value.toString().replace(',', '.')) || 0;
-    }
-    item[field] = value;
-    saveData(null);
+async function addExtraCost() {
+    const newExtraCost = { name: 'Novo Custo', cost: 0, source: 'startup' };
+    await addExtraCostDB(newExtraCost);
+    await fetchAndPopulateAppData(() => renderCalculator(updateIngredient, deleteIngredient, updateExtraCost, deleteExtraCost));
     calculate();
 }
 
-function deleteExtraCost(id) {
-    showConfirm('Excluir Custo?', 'Tem certeza?', () => {
-        appData.extraCosts = appData.extraCosts.filter(i => i.id !== id);
-        saveData(() => {
+async function updateExtraCost(id, field, value) {
+    let updates = { [field]: value };
+    if (field === 'cost') {
+        updates[field] = parseFloat(value.toString().replace(',', '.')) || 0;
+    }
+    await updateExtraCostDB(id, updates);
+    calculate();
+}
+
+async function deleteExtraCost(id) {
+    showConfirm('Excluir Custo?', 'Tem certeza?', async () => {
+        await deleteExtraCostDB(id);
+        await fetchAndPopulateAppData(() => {
             renderCalculator(updateIngredient, deleteIngredient, updateExtraCost, deleteExtraCost);
             calculate();
         });

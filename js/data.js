@@ -1,7 +1,5 @@
 import { supabase } from './supabase-client.js';
 
-export const STORAGE_KEY_V5 = 'startup_natal_v5_data';
-
 export const phasesConfig = [
     { id: 'p1', title: 'Semana 1: Ideação & Marca', dates: '18-24 Nov', icon: 'looks_one' },
     { id: 'p2', title: 'Semana 2: Finanças & Web', dates: '25-30 Nov', icon: 'looks_two' },
@@ -12,12 +10,12 @@ export const phasesConfig = [
 export const defaultData = {
     members: [],
     tasks: [
-        { id: 1, phaseId: 'p1', title: "Definir a Dupla & Persona", description: "", assignee: "Todos", status: "done" },
-        { id: 2, phaseId: 'p1', title: "Criar Nome e Logo no Canva", description: "", assignee: "", status: "todo" },
-        { id: 3, phaseId: 'p2', title: "Comprar Ingredientes", description: "", assignee: "", status: "todo" },
-        { id: 4, phaseId: 'p2', title: "Criar página no Site", description: "", assignee: "", status: "todo" },
-        { id: 5, phaseId: 'p3', title: "Assar primeira leva", description: "", assignee: "", status: "todo" },
-        { id: 6, phaseId: 'p3', title: "Embalar produtos", description: "", assignee: "", status: "todo" }
+        { id: 1, phase_id: 'p1', title: "Definir a Dupla & Persona", description: "", assignee: "Todos", status: "done" },
+        { id: 2, phase_id: 'p1', title: "Criar Nome e Logo no Canva", description: "", assignee: "", status: "todo" },
+        { id: 3, phase_id: 'p2', title: "Comprar Ingredientes", description: "", assignee: "", status: "todo" },
+        { id: 4, phase_id: 'p2', title: "Criar página no Site", description: "", assignee: "", status: "todo" },
+        { id: 5, phase_id: 'p3', title: "Assar primeira leva", description: "", assignee: "", status: "todo" },
+        { id: 6, phase_id: 'p3', title: "Embalar produtos", description: "", assignee: "Todos", status: "todo" }
     ],
     ingredients: [
         { id: 1, name: 'Farinha de Trigo', price: 5.00, grams: 300, source: 'startup' },
@@ -31,88 +29,297 @@ export const defaultData = {
     ]
 };
 
-// Initialize with local storage or default
-export let appData = JSON.parse(localStorage.getItem(STORAGE_KEY_V5)) || JSON.parse(JSON.stringify(defaultData));
+// Initialize appData with default values. It will be populated from Supabase if logged in.
+export let appData = JSON.parse(JSON.stringify(defaultData));
 
-export async function loadDataFromCloud(renderCallback) {
-    if (!supabase) return;
+// Placeholder for localStorage key (now only for caching/fallback)
+const STORAGE_KEY_V5 = 'startup_natal_v5_data';
+
+export async function fetchAndPopulateAppData(renderCallback) {
+    if (!supabase) {
+        console.warn("Supabase client not initialized. Using local storage for data.");
+        // Try to load from local storage if Supabase is not available
+        const localData = localStorage.getItem(STORAGE_KEY_V5);
+        if (localData) {
+            appData = JSON.parse(localData);
+        } else {
+            appData = JSON.parse(JSON.stringify(defaultData));
+        }
+        if (renderCallback) renderCallback();
+        return;
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+        // Not logged in, use local storage or default data
+        const localData = localStorage.getItem(STORAGE_KEY_V5);
+        if (localData) {
+            appData = JSON.parse(localData);
+        } else {
+            appData = JSON.parse(JSON.stringify(defaultData));
+        }
+        if (renderCallback) renderCallback();
+        return;
+    }
 
     try {
-        const { data, error } = await supabase
-            .from('user_data')
-            .select('content')
-            .eq('user_id', user.id)
-            .single();
+        const userId = user.id;
 
-        if (error && error.code !== 'PGRST116') { // PGRST116 is "Row not found"
-            console.error('Error fetching data:', error);
-            return;
-        }
+        const [
+            { data: members, error: membersError },
+            { data: tasks, error: tasksError },
+            { data: ingredients, error: ingredientsError },
+            { data: extraCosts, error: extraCostsError }
+        ] = await Promise.all([
+            supabase.from('members').select('*').eq('user_id', userId),
+            supabase.from('tasks').select('*').eq('user_id', userId),
+            supabase.from('ingredients').select('*').eq('user_id', userId),
+            supabase.from('extra_costs').select('*').eq('user_id', userId)
+        ]);
 
-        if (data && data.content) {
-            console.log('Data loaded from cloud');
-            appData = data.content;
-            // Update local storage to match cloud
-            localStorage.setItem(STORAGE_KEY_V5, JSON.stringify(appData));
-        } else {
-            // No data in cloud, assume new user or first sync.
-            // Save current local data to cloud
-            await saveDataToCloud();
-        }
+        if (membersError) console.error("Error fetching members:", membersError);
+        if (tasksError) console.error("Error fetching tasks:", tasksError);
+        if (ingredientsError) console.error("Error fetching ingredients:", ingredientsError);
+        if (extraCostsError) console.error("Error fetching extra costs:", extraCostsError);
+
+        appData.members = members || [];
+        appData.tasks = tasks || [];
+        appData.ingredients = ingredients || [];
+        appData.extraCosts = extraCosts || [];
+
+        // Update local storage for caching/offline use
+        localStorage.setItem(STORAGE_KEY_V5, JSON.stringify(appData));
+
+        console.log('Data loaded from cloud');
     } catch (e) {
-        console.error("Unexpected error loading data", e);
+        console.error("Unexpected error loading data from cloud", e);
+        // Fallback to local storage if cloud fetch fails
+        const localData = localStorage.getItem(STORAGE_KEY_V5);
+        if (localData) appData = JSON.parse(localData);
+        else appData = JSON.parse(JSON.stringify(defaultData));
     } finally {
         if (renderCallback) renderCallback();
     }
 }
 
-async function saveDataToCloud() {
+// --- CRUD Operations for each table ---
+
+export async function addMember(name) {
     if (!supabase) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // We need to upsert. The constraint is usually on the primary key (id), 
-    // but we want one row per user. 
-    // Our table RLS enforces user_id check.
-    // We should first check if row exists to update, or just upsert if we had a unique constraint on user_id.
-    // The current table setup: id is PK. user_id is FK.
-    // Let's search by user_id.
-
-    const { data: existing } = await supabase
-        .from('user_data')
-        .select('id')
-        .eq('user_id', user.id)
+    const { data, error } = await supabase
+        .from('members')
+        .insert({ user_id: user.id, name: name })
+        .select()
         .single();
+    if (error) console.error("Error adding member:", error);
+    return data;
+}
 
-    if (existing) {
-        await supabase
-            .from('user_data')
-            .update({ content: appData, updated_at: new Date() })
-            .eq('id', existing.id);
-    } else {
-        await supabase
-            .from('user_data')
-            .insert([{ user_id: user.id, content: appData }]);
+export async function updateMember(id, name) {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabase
+        .from('members')
+        .update({ name: name })
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+    if (error) console.error("Error updating member:", error);
+    return data;
+}
+
+export async function deleteMember(id) {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+        .from('members')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+    if (error) console.error("Error deleting member:", error);
+    return !error;
+}
+
+
+export async function addTask(task) {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabase
+        .from('tasks')
+        .insert({ user_id: user.id, ...task })
+        .select()
+        .single();
+    if (error) console.error("Error adding task:", error);
+    return data;
+}
+
+export async function updateTask(id, updates) {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabase
+        .from('tasks')
+        .update(updates)
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+    if (error) console.error("Error updating task:", error);
+    return data;
+}
+
+export async function deleteTask(id) {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+    if (error) console.error("Error deleting task:", error);
+    return !error;
+}
+
+
+export async function addIngredient(ingredient) {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabase
+        .from('ingredients')
+        .insert({ user_id: user.id, ...ingredient })
+        .select()
+        .single();
+    if (error) console.error("Error adding ingredient:", error);
+    return data;
+}
+
+export async function updateIngredient(id, updates) {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabase
+        .from('ingredients')
+        .update(updates)
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+    if (error) console.error("Error updating ingredient:", error);
+    return data;
+}
+
+export async function deleteIngredient(id) {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+        .from('ingredients')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+    if (error) console.error("Error deleting ingredient:", error);
+    return !error;
+}
+
+
+export async function addExtraCost(extraCost) {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabase
+        .from('extra_costs')
+        .insert({ user_id: user.id, ...extraCost })
+        .select()
+        .single();
+    if (error) console.error("Error adding extra cost:", error);
+    return data;
+}
+
+export async function updateExtraCost(id, updates) {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await supabase
+        .from('extra_costs')
+        .update(updates)
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+    if (error) console.error("Error updating extra cost:", error);
+    return data;
+}
+
+export async function deleteExtraCost(id) {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase
+        .from('extra_costs')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+    if (error) console.error("Error deleting extra cost:", error);
+    return !error;
+}
+
+
+export async function resetData() {
+    if (!supabase) {
+        console.warn("Supabase client not initialized. Cannot reset cloud data.");
+        appData = JSON.parse(JSON.stringify(defaultData));
+        localStorage.removeItem(STORAGE_KEY_V5);
+        return;
+    }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        console.warn("Not logged in. Cannot reset cloud data.");
+        appData = JSON.parse(JSON.stringify(defaultData));
+        localStorage.removeItem(STORAGE_KEY_V5);
+        return;
+    }
+
+    const userId = user.id;
+
+    try {
+        await Promise.all([
+            supabase.from('members').delete().eq('user_id', userId),
+            supabase.from('tasks').delete().eq('user_id', userId),
+            supabase.from('ingredients').delete().eq('user_id', userId),
+            supabase.from('extra_costs').delete().eq('user_id', userId)
+        ]);
+        console.log("User data reset in cloud.");
+    } catch (e) {
+        console.error("Error resetting user data in cloud:", e);
+    } finally {
+        appData = JSON.parse(JSON.stringify(defaultData));
+        localStorage.setItem(STORAGE_KEY_V5, JSON.stringify(appData)); // Reset local cache too
     }
 }
 
+// Dummy saveData for compatibility, as direct CRUD is preferred
 export function saveData(callback) {
-    // 1. Save Local
-    localStorage.setItem(STORAGE_KEY_V5, JSON.stringify(appData));
-    
-    // 2. Trigger UI update immediately
+    localStorage.setItem(STORAGE_KEY_V5, JSON.stringify(appData)); // Still save to local storage as cache
     if (callback) callback();
-
-    // 3. Sync Cloud in background
-    saveDataToCloud().catch(err => console.error("Cloud sync failed:", err));
-}
-
-export function resetData(callback) {
-    // Reset to default
-    appData = JSON.parse(JSON.stringify(defaultData));
-    
-    // Save (handles both local and cloud reset)
-    saveData(callback);
+    // Cloud sync now happens directly via CRUD functions
 }
