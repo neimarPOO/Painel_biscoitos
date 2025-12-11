@@ -123,6 +123,31 @@ body.dark-theme::before {
     letter-spacing: 0.5px;
 }
 
+/* Utility Classes */
+.flex {
+    display: flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.gap-2 {
+    gap: 8px;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.mt-4 {
+    margin-top: 16px;
+}
+
+.grid {
+    display: grid;
+}
+
 /* Typography Refinements - Mountains of Christmas */
 .navbar-title,
 h3,
