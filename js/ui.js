@@ -1,5 +1,6 @@
 import { appData, fetchAndPopulateAppData, deleteMember, updateTask, deleteTask, phasesConfig } from './data.js';
 import { showConfirm } from './utils.js';
+import Chart from 'chart.js/auto';
 
 // ==========================
 // TEAM & PROGRESS UI
