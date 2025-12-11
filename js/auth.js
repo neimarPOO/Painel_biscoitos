@@ -1,5 +1,5 @@
 import { supabase } from './supabase-client.js';
-import { loadDataFromCloud, appData, saveData } from './data.js';
+import { fetchAndPopulateAppData, appData } from './data.js';
 // Removed circular dependency import
 
 export let currentUser = null;
@@ -24,7 +24,7 @@ export async function initAuth(renderCallback) {
         
         if (currentUser) {
             // Load user data if logged in
-            await loadDataFromCloud(renderCallback);
+            await fetchAndPopulateAppData(renderCallback);
         } else {
             // If logged out, maybe reset to default local data or keep current?
             // Usually, logout means clearing sensitive data.
