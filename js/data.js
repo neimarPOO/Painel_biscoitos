@@ -1,3 +1,5 @@
+import { supabase } from './supabase-client.js';
+
 export const STORAGE_KEY_V5 = 'startup_natal_v5_data';
 
 export const phasesConfig = [
@@ -29,23 +31,86 @@ export const defaultData = {
     ]
 };
 
+// Initialize with local storage or default
 export let appData = JSON.parse(localStorage.getItem(STORAGE_KEY_V5)) || JSON.parse(JSON.stringify(defaultData));
 
+export async function loadDataFromCloud(renderCallback) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    try {
+        const { data, error } = await supabase
+            .from('user_data')
+            .select('content')
+            .eq('user_id', user.id)
+            .single();
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 is "Row not found"
+            console.error('Error fetching data:', error);
+            return;
+        }
+
+        if (data && data.content) {
+            console.log('Data loaded from cloud');
+            appData = data.content;
+            // Update local storage to match cloud
+            localStorage.setItem(STORAGE_KEY_V5, JSON.stringify(appData));
+        } else {
+            // No data in cloud, assume new user or first sync.
+            // Save current local data to cloud
+            await saveDataToCloud();
+        }
+    } catch (e) {
+        console.error("Unexpected error loading data", e);
+    } finally {
+        if (renderCallback) renderCallback();
+    }
+}
+
+async function saveDataToCloud() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // We need to upsert. The constraint is usually on the primary key (id), 
+    // but we want one row per user. 
+    // Our table RLS enforces user_id check.
+    // We should first check if row exists to update, or just upsert if we had a unique constraint on user_id.
+    // The current table setup: id is PK. user_id is FK.
+    // Let's search by user_id.
+
+    const { data: existing } = await supabase
+        .from('user_data')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+    if (existing) {
+        await supabase
+            .from('user_data')
+            .update({ content: appData, updated_at: new Date() })
+            .eq('id', existing.id);
+    } else {
+        await supabase
+            .from('user_data')
+            .insert([{ user_id: user.id, content: appData }]);
+    }
+}
+
 export function saveData(callback) {
+    // 1. Save Local
     localStorage.setItem(STORAGE_KEY_V5, JSON.stringify(appData));
+    
+    // 2. Trigger UI update immediately
     if (callback) callback();
+
+    // 3. Sync Cloud in background
+    saveDataToCloud().catch(err => console.error("Cloud sync failed:", err));
 }
 
 export function resetData(callback) {
-    localStorage.removeItem(STORAGE_KEY_V5);
+    // Reset to default
     appData = JSON.parse(JSON.stringify(defaultData));
+    
+    // Save (handles both local and cloud reset)
     saveData(callback);
 }
-
-// Helper to update appData reference if needed (though exporting let allows mutation, 
-// importing modules get a live binding, so direct mutation on appData property works if we export the object wrapper, 
-// but here we exported 'let appData'. 
-// To be safe with module bindings, we can just mutate the properties of appData if it was a const object, 
-// but since we might replace the whole object on reset, we need to be careful.
-// Actually, 'resetData' above reassigns 'appData'. In ES modules, reassigning an exported 'let' variable 
-// inside the module updates the value for importers. So this is fine.

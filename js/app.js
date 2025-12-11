@@ -1,6 +1,7 @@
 import { appData, saveData, resetData } from './data.js';
 import { showConfirm, setupConfirmDialog, toggleTheme, loadTheme } from './utils.js';
 import { renderTeam, renderProgress, renderTimeline, renderCalculator, updateCalculationUI } from './ui.js';
+import { initAuth } from './auth.js';
 
 // ==========================
 // GLOBAL STATE & HANDLERS
@@ -15,7 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTheme();
     setupConfirmDialog();
     setupEventListeners();
-    renderApp();
+    
+    // Initialize Auth (which will load data and call renderApp)
+    initAuth(renderApp);
+    
+    // Initial render (optimistic, using local data while auth checks)
+    renderApp(); 
 });
 
 function setupEventListeners() {

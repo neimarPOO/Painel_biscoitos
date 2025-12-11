@@ -48,6 +48,14 @@
                 <!-- Event listener attached in app.js, onclick attribute kept for reference but handled in JS -->
                 <md-icon>restart_alt</md-icon>
             </md-icon-button>
+            <md-filled-button id="login-btn">
+                <md-icon slot="icon">login</md-icon>
+                Login
+            </md-filled-button>
+            <div id="user-info" style="display: none; align-items: center; gap: 8px;">
+                <span id="user-email" class="md-typescale-label-medium"></span>
+                <md-icon-button id="logout-btn"><md-icon>logout</md-icon></md-icon-button>
+            </div>
         </div>
     </div>
 
@@ -228,6 +236,25 @@
         </div>
     </md-dialog>
 
+    <md-dialog id="auth-dialog">
+        <div slot="headline" id="auth-title">Login</div>
+        <form slot="content" id="auth-form" method="dialog">
+            <md-outlined-text-field label="Email" id="auth-email" type="email" required
+                style="width: 100%; margin-bottom: 16px;"></md-outlined-text-field>
+            <md-outlined-text-field label="Senha" id="auth-password" type="password" required
+                style="width: 100%; margin-bottom: 16px;"></md-outlined-text-field>
+            <p id="auth-error" style="color: var(--md-sys-color-error); display: none;"></p>
+        </form>
+        <div slot="actions">
+            <md-text-button id="auth-switch-mode">Criar conta</md-text-button>
+            <div style="flex-grow: 1;"></div>
+            <md-text-button value="cancel">Cancelar</md-text-button>
+            <md-filled-button id="auth-submit-btn">Entrar</md-filled-button>
+        </div>
+    </md-dialog>
+
+    <!-- Configuration (Must be loaded before app) -->
+    <script src="js/config.js"></script>
     <!-- Main Application Logic -->
     <script type="module" src="js/app.js"></script>
 </body>
