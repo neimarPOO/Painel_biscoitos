@@ -1,16 +1,17 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+import { createClient } from '@supabase/supabase-js';
 
-// Debugging: Log the values we are trying to use
-console.log("Supabase Client Init - Project_URL:", window.Project_URL);
-console.log("Supabase Client Init - API_anon_Key:", window.API_anon_Key ? "Found (hidden)" : "Not Found");
+// No Vite, usamos import.meta.env para acessar variáveis.
+// Elas DEVEM começar com VITE_ para estarem disponíveis aqui.
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-const SUPABASE_URL = window.Project_URL;
-const SUPABASE_KEY = window.API_anon_Key;
+console.log("Supabase Client Init - URL:", SUPABASE_URL ? "Defined" : "Not Found");
+console.log("Supabase Client Init - KEY:", SUPABASE_KEY ? "Defined" : "Not Found");
 
 let client = null;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-    console.error("CRITICAL: Supabase keys not found. Check Netlify Snippet Injection. Expected window.Project_URL and window.API_anon_Key.");
+    console.error("CRITICAL: Environment variables VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY not found.");
 } else {
     try {
         client = createClient(SUPABASE_URL, SUPABASE_KEY);
