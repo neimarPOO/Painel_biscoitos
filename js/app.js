@@ -27,8 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupEventListeners() {
     // Navbar buttons
     document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
-    document.querySelector('md-icon-button[onclick="resetData()"]').onclick = null; // Remove inline
-    document.querySelector('md-icon-button[onclick="resetData()"]').addEventListener('click', () => resetData(renderApp));
+    document.getElementById('reset-data-btn').addEventListener('click', () => resetData(renderApp));
 
     // Tabs
     const tabs = document.querySelector('md-tabs');
@@ -40,11 +39,9 @@ function setupEventListeners() {
     });
 
     // Team
-    document.querySelector('md-filled-button[onclick="addMember()"]').onclick = null;
-    document.querySelector('md-filled-button[onclick="addMember()"]').addEventListener('click', addMember);
+    document.getElementById('add-member-btn').addEventListener('click', addMember);
 
     // Task Modal
-    document.querySelector('md-text-button[value="save"]').onclick = null;
     document.querySelector('md-text-button[value="save"]').addEventListener('click', saveTask);
 
     // Calculator Inputs
@@ -54,11 +51,8 @@ function setupEventListeners() {
     document.getElementById('units-sold').addEventListener('input', calculate);
 
     // Calculator Add Buttons
-    document.querySelector('md-text-button[onclick="addIngredient()"]').onclick = null;
-    document.querySelector('md-text-button[onclick="addIngredient()"]').addEventListener('click', addIngredient);
-
-    document.querySelector('md-text-button[onclick="addExtraCost()"]').onclick = null;
-    document.querySelector('md-text-button[onclick="addExtraCost()"]').addEventListener('click', addExtraCost);
+    document.getElementById('add-ingredient-btn').addEventListener('click', addIngredient);
+    document.getElementById('add-extracost-btn').addEventListener('click', addExtraCost);
 }
 
 function renderApp() {

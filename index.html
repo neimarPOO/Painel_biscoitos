@@ -19,6 +19,9 @@
     <!-- External Styles -->
     <link rel="stylesheet" href="css/styles.css">
 
+    <!-- Configuration (Must be loaded before app) -->
+    <script src="js/config.js"></script>
+
     <script type="importmap">
         { "imports": { "@material/web/": "https://esm.run/@material/web/" } }
     </script>
@@ -44,8 +47,8 @@
             <md-icon-button id="theme-toggle-btn">
                 <md-icon>dark_mode</md-icon>
             </md-icon-button>
-            <md-icon-button onclick="resetData()">
-                <!-- Event listener attached in app.js, onclick attribute kept for reference but handled in JS -->
+            <md-icon-button id="reset-data-btn">
+                <!-- Event listener attached in app.js -->
                 <md-icon>restart_alt</md-icon>
             </md-icon-button>
             <md-filled-button id="login-btn">
@@ -80,7 +83,7 @@
                 <div class="flex gap-2 items-center">
                     <md-outlined-text-field label="Nome do integrante" id="new-member-name"
                         style="flex-grow: 1;"></md-outlined-text-field>
-                    <md-filled-button onclick="addMember()">
+                    <md-filled-button id="add-member-btn">
                         <md-icon slot="icon">add</md-icon>
                         Adicionar
                     </md-filled-button>
@@ -115,7 +118,7 @@
                             <h3>Ingredientes da Receita Base</h3>
                         </div>
                         <div id="ingredient-inputs"></div>
-                        <md-text-button onclick="addIngredient()" style="margin-top: 16px;">
+                        <md-text-button id="add-ingredient-btn" style="margin-top: 16px;">
                             <md-icon slot="icon">add</md-icon>
                             Adicionar Ingrediente
                         </md-text-button>
@@ -126,7 +129,7 @@
                             <h3>Custos Extras & Fixos</h3>
                         </div>
                         <div id="extra-costs-inputs"></div>
-                        <md-text-button onclick="addExtraCost()" style="margin-top: 16px;">
+                        <md-text-button id="add-extracost-btn" style="margin-top: 16px;">
                             <md-icon slot="icon">add</md-icon>
                             Adicionar Custo
                         </md-text-button>
@@ -253,10 +256,6 @@
         </div>
     </md-dialog>
 
-    <!-- Configuration (Must be loaded before app) -->
-    <script src="js/config.js"></script>
     <!-- Main Application Logic -->
     <script type="module" src="js/app.js"></script>
 </body>
-
-</html>
