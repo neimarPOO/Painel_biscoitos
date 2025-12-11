@@ -5,6 +5,13 @@ import { loadDataFromCloud, appData, saveData } from './data.js';
 export let currentUser = null;
 
 export async function initAuth(renderCallback) {
+    if (!supabase) {
+        console.warn("Auth disabled: Supabase client not initialized.");
+        setupAuthEventListeners(); // Still setup listeners to show error on click
+        renderCallback(); // Render app with local data
+        return;
+    }
+
     // 1. Check active session
     const { data: { session } } = await supabase.auth.getSession();
     currentUser = session?.user || null;
@@ -56,12 +63,17 @@ function setupAuthEventListeners() {
     let isLoginMode = true;
 
     loginBtn.addEventListener('click', () => {
+        if (!supabase) {
+            alert("Erro: Configuração do Supabase ausente. Verifique o console.");
+            return;
+        }
         isLoginMode = true;
         updateDialogMode();
         authDialog.show();
     });
 
     logoutBtn.addEventListener('click', async () => {
+        if (!supabase) return;
         await supabase.auth.signOut();
         window.location.reload(); // Simple way to reset state
     });

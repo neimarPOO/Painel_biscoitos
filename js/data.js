@@ -35,6 +35,7 @@ export const defaultData = {
 export let appData = JSON.parse(localStorage.getItem(STORAGE_KEY_V5)) || JSON.parse(JSON.stringify(defaultData));
 
 export async function loadDataFromCloud(renderCallback) {
+    if (!supabase) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -68,6 +69,7 @@ export async function loadDataFromCloud(renderCallback) {
 }
 
 async function saveDataToCloud() {
+    if (!supabase) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
