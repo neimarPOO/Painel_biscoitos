@@ -26,7 +26,12 @@ export const defaultData = {
         { id: 1, name: 'Ingredientes Extras', cost: 0, source: 'startup' },
         { id: 2, name: 'Embalagens', cost: 0, source: 'startup' },
         { id: 3, name: 'Gás / Energia', cost: 5.00, source: 'proprio' }
-    ]
+    ],
+    settings: {
+        productionGoal: 50,
+        unitsPerPackage: 6,
+        unitsSold: 0
+    }
 };
 
 // Initialize appData with default values. It will be populated from Supabase if logged in.
@@ -38,10 +43,10 @@ const STORAGE_KEY_V5 = 'startup_natal_v5_data';
 export async function fetchAndPopulateAppData(renderCallback) {
     if (!supabase) {
         console.warn("Supabase client not initialized. Using local storage for data.");
-        // Try to load from local storage if Supabase is not available
         const localData = localStorage.getItem(STORAGE_KEY_V5);
         if (localData) {
             appData = JSON.parse(localData);
+            if (!appData.settings) appData.settings = defaultData.settings; // Ensure settings exist
         } else {
             appData = JSON.parse(JSON.stringify(defaultData));
         }
@@ -51,10 +56,10 @@ export async function fetchAndPopulateAppData(renderCallback) {
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-        // Not logged in, use local storage or default data
         const localData = localStorage.getItem(STORAGE_KEY_V5);
         if (localData) {
             appData = JSON.parse(localData);
+            if (!appData.settings) appData.settings = defaultData.settings;
         } else {
             appData = JSON.parse(JSON.stringify(defaultData));
         }
@@ -69,31 +74,41 @@ export async function fetchAndPopulateAppData(renderCallback) {
             { data: members, error: membersError },
             { data: tasks, error: tasksError },
             { data: ingredients, error: ingredientsError },
-            { data: extraCosts, error: extraCostsError }
+            { data: extraCosts, error: extraCostsError },
+            { data: settingsData, error: settingsError }
         ] = await Promise.all([
-            supabase.from('members').select('*').eq('user_id', userId),
-            supabase.from('tasks').select('*').eq('user_id', userId),
-            supabase.from('ingredients').select('*').eq('user_id', userId),
-            supabase.from('extra_costs').select('*').eq('user_id', userId)
+            supabase.from('members').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
+            supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
+            supabase.from('ingredients').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
+            supabase.from('extra_costs').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
+            supabase.from('user_settings').select('*').eq('user_id', userId).single()
         ]);
 
         if (membersError) console.error("Error fetching members:", membersError);
         if (tasksError) console.error("Error fetching tasks:", tasksError);
         if (ingredientsError) console.error("Error fetching ingredients:", ingredientsError);
         if (extraCostsError) console.error("Error fetching extra costs:", extraCostsError);
+        // settingsError is expected if row doesn't exist yet (PGRST116)
 
         appData.members = members || [];
         appData.tasks = tasks || [];
         appData.ingredients = ingredients || [];
         appData.extraCosts = extraCosts || [];
+        
+        if (settingsData) {
+            appData.settings = {
+                productionGoal: parseFloat(settingsData.production_goal) || 50,
+                unitsPerPackage: parseFloat(settingsData.units_per_package) || 6,
+                unitsSold: parseFloat(settingsData.units_sold) || 0
+            };
+        } else {
+            appData.settings = JSON.parse(JSON.stringify(defaultData.settings));
+        }
 
-        // Update local storage for caching/offline use
         localStorage.setItem(STORAGE_KEY_V5, JSON.stringify(appData));
-
         console.log('Data loaded from cloud');
     } catch (e) {
         console.error("Unexpected error loading data from cloud", e);
-        // Fallback to local storage if cloud fetch fails
         const localData = localStorage.getItem(STORAGE_KEY_V5);
         if (localData) appData = JSON.parse(localData);
         else appData = JSON.parse(JSON.stringify(defaultData));
@@ -102,7 +117,29 @@ export async function fetchAndPopulateAppData(renderCallback) {
     }
 }
 
-// --- CRUD Operations for each table ---
+// --- CRUD Operations ---
+
+export async function saveUserSettings(settings) {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const dbSettings = {
+        user_id: user.id,
+        production_goal: settings.productionGoal,
+        units_per_package: settings.unitsPerPackage,
+        units_sold: settings.unitsSold
+    };
+
+    const { error } = await supabase
+        .from('user_settings')
+        .upsert(dbSettings)
+        .select()
+        .single();
+
+    if (error) console.error("Error saving user settings:", error);
+    return !error;
+}
 
 export async function addMember(name) {
     if (!supabase) return;
@@ -306,7 +343,8 @@ export async function resetData() {
             supabase.from('members').delete().eq('user_id', userId),
             supabase.from('tasks').delete().eq('user_id', userId),
             supabase.from('ingredients').delete().eq('user_id', userId),
-            supabase.from('extra_costs').delete().eq('user_id', userId)
+            supabase.from('extra_costs').delete().eq('user_id', userId),
+            supabase.from('user_settings').delete().eq('user_id', userId)
         ]);
         console.log("User data reset in cloud.");
     } catch (e) {
@@ -317,9 +355,8 @@ export async function resetData() {
     }
 }
 
-// Dummy saveData for compatibility, as direct CRUD is preferred
+// Dummy saveData for compatibility
 export function saveData(callback) {
-    localStorage.setItem(STORAGE_KEY_V5, JSON.stringify(appData)); // Still save to local storage as cache
+    localStorage.setItem(STORAGE_KEY_V5, JSON.stringify(appData));
     if (callback) callback();
-    // Cloud sync now happens directly via CRUD functions
 }

@@ -1,4 +1,4 @@
-import { appData, fetchAndPopulateAppData, addMember as addMemberDB, updateMember as updateMemberDB, deleteMember as deleteMemberDB, addTask as addTaskDB, updateTask as updateTaskDB, deleteTask as deleteTaskDB, addIngredient as addIngredientDB, updateIngredient as updateIngredientDB, deleteIngredient as deleteIngredientDB, addExtraCost as addExtraCostDB, updateExtraCost as updateExtraCostDB, deleteExtraCost as deleteExtraCostDB, resetData as resetDataDB } from './data.js';
+import { appData, fetchAndPopulateAppData, addMember as addMemberDB, updateMember as updateMemberDB, deleteMember as deleteMemberDB, addTask as addTaskDB, updateTask as updateTaskDB, deleteTask as deleteTaskDB, addIngredient as addIngredientDB, updateIngredient as updateIngredientDB, deleteIngredient as deleteIngredientDB, addExtraCost as addExtraCostDB, updateExtraCost as updateExtraCostDB, deleteExtraCost as deleteExtraCostDB, resetData as resetDataDB, saveUserSettings } from './data.js';
 import { showConfirm, setupConfirmDialog, toggleTheme, loadTheme } from './utils.js';
 import { renderTeam, renderProgress, renderTimeline, renderCalculator, updateCalculationUI } from './ui.js';
 import { initAuth } from './auth.js';
@@ -55,6 +55,11 @@ function setupEventListeners() {
     document.getElementById('units-per-package').addEventListener('input', calculate);
     document.getElementById('units-sold').addEventListener('input', calculate);
 
+    // Save Settings Buttons
+    document.getElementById('save-meta-btn').addEventListener('click', () => saveSingleSetting('productionGoal', 'meta-qtd'));
+    document.getElementById('save-package-btn').addEventListener('click', () => saveSingleSetting('unitsPerPackage', 'units-per-package'));
+    document.getElementById('save-sold-btn').addEventListener('click', () => saveSingleSetting('unitsSold', 'units-sold'));
+
     // Calculator Add Buttons
     document.getElementById('add-ingredient-btn').addEventListener('click', addIngredient);
     document.getElementById('add-extracost-btn').addEventListener('click', addExtraCost);
@@ -65,7 +70,35 @@ function renderApp() {
     renderTimeline(openTaskModal);
     renderProgress();
     renderCalculator(updateIngredient, deleteIngredient, updateExtraCost, deleteExtraCost);
+    
+    // Initialize inputs with data from DB/Local
+    if (appData.settings) {
+        document.getElementById('meta-qtd').value = appData.settings.productionGoal;
+        document.getElementById('units-per-package').value = appData.settings.unitsPerPackage;
+        document.getElementById('units-sold').value = appData.settings.unitsSold;
+    }
+
     calculate();
+}
+
+async function saveSingleSetting(settingKey, inputId) {
+    const value = parseFloat(document.getElementById(inputId).value.replace(',', '.')) || 0;
+    appData.settings[settingKey] = value;
+    
+    // Save to DB
+    const success = await saveUserSettings(appData.settings);
+    
+    if (success) {
+        // Visual feedback (simple console log for now, or maybe a toast if available)
+        console.log(`Setting ${settingKey} saved: ${value}`);
+        const btn = document.getElementById(inputId).nextElementSibling; // The button is next to input in the div
+        if (btn && btn.tagName === 'MD-ICON-BUTTON') {
+            const icon = btn.querySelector('md-icon');
+            const originalIcon = icon.innerText;
+            icon.innerText = 'check';
+            setTimeout(() => icon.innerText = originalIcon, 2000);
+        }
+    }
 }
 
 // ==========================
@@ -96,7 +129,7 @@ function openTaskModal(phaseId = null, taskId = null) {
     taskAssigneeSelect.innerHTML = '<md-select-option value=""><div slot="headline">Ninguém</div></md-select-option>';
     appData.members?.forEach(m => {
         const opt = document.createElement('md-select-option');
-        opt.value = m.name; // Use m.name as value, since m is now an object {id, name}
+        opt.value = m.name; 
         opt.innerHTML = `<div slot="headline">${m.name}</div>`;
         taskAssigneeSelect.appendChild(opt);
     });
@@ -127,7 +160,7 @@ async function saveTask() {
     const taskTitleInput = document.getElementById('modal-task-title');
     const taskDescriptionInput = document.getElementById('modal-task-description');
     const taskAssigneeSelect = document.getElementById('modal-task-assignee');
-    const taskStatusSelect = document.getElementById('modal-task-status'); // Corrected from `document = document.getElementById(...)`
+    const taskStatusSelect = document.getElementById('modal-task-status');
     const taskDialog = document.getElementById('task-dialog');
 
     const title = taskTitleInput.value.trim();
@@ -171,7 +204,7 @@ async function addIngredient() {
 }
 
 async function updateIngredient(id, field, value) {
-    // 1. Optimistic Update: Update local appData immediately
+    // 1. Optimistic Update
     const item = appData.ingredients.find(i => i.id === id);
     if (item) {
         let parsedValue = value;
@@ -181,23 +214,20 @@ async function updateIngredient(id, field, value) {
         item[field] = parsedValue;
     }
 
-    // 2. Recalculate totals immediately to update UI footer
+    // 2. Recalculate totals immediately
     calculate();
 
-    // 3. Send update to DB in background (no await needed for UI responsiveness, but good to handle errors)
+    // 3. Send update to DB in background
     try {
         let updates = { [field]: item[field] };
         await updateIngredientDB(id, updates);
     } catch (error) {
         console.error("Failed to update ingredient in DB:", error);
-        // Optionally revert local change or show error toast
     }
 }
 
 async function deleteIngredient(id) {
     showConfirm('Excluir Ingrediente?', 'Tem certeza?', async () => {
-        // Optimistic UI update could be complex here, so we stick to fetch-render pattern for delete
-        // but let's ensure we catch errors
         try {
             await deleteIngredientDB(id);
             await fetchAndPopulateAppData(() => {
@@ -269,25 +299,33 @@ function calculate() {
     });
 
     const totalCost = totalStartup + totalOwn;
+    
+    // Read from DOM, but these should be pre-filled by renderApp
     const quantity = parseFloat(document.getElementById('meta-qtd').value.replace(',', '.')) || 1;
     const unitsSold = parseFloat(document.getElementById('units-sold').value.replace(',', '.')) || 0;
+
+    // Update appData local state just in case (though save button handles DB)
+    if (appData.settings) {
+        appData.settings.productionGoal = quantity;
+        appData.settings.unitsSold = unitsSold;
+        appData.settings.unitsPerPackage = parseFloat(document.getElementById('units-per-package').value.replace(',', '.')) || 1;
+    }
 
     // 1. Custo por unidade
     const unitCost = isFinite(totalCost / quantity) ? totalCost / quantity : 0;
 
-    // 2. Preço de Equilíbrio (para cobrir os custos TOTAIS com as unidades vendidas)
-    // This is the "suggested price" the user was missing.
+    // 2. Preço de Equilíbrio
     const suggestedPrice = (unitsSold > 0) ? (totalCost / unitsSold) : 0;
 
-    // 3. Preço Final (baseado no custo unitário + margem de lucro)
+    // 3. Preço Final
     const margin = document.getElementById('margin-slider').value;
     const finalPrice = unitCost * (1 + (margin / 100));
 
-    // 4. Lucros (usando o Preço Final)
-    const profit = finalPrice - unitCost; // Lucro por unidade vendida
-    const netProfit = (finalPrice * unitsSold) - totalCost; // Lucro líquido total
+    // 4. Lucros
+    const profit = finalPrice - unitCost; 
+    const netProfit = (finalPrice * unitsSold) - totalCost; 
 
-    const unitsPerPackage = parseFloat(document.getElementById('units-per-package').value) || 1;
+    const unitsPerPackage = parseFloat(document.getElementById('units-per-package').value.replace(',', '.')) || 1;
     const packagePrice = finalPrice * unitsPerPackage;
 
     const totalRevenue = finalPrice * unitsSold;
