@@ -160,50 +160,88 @@ async function saveTask() {
 // CALCULATOR LOGIC
 // ==========================
 async function addIngredient() {
-    const newIngredient = { name: 'Novo Ingrediente', price: 0, grams: 0, source: 'startup' };
-    await addIngredientDB(newIngredient);
-    await fetchAndPopulateAppData(() => renderCalculator(updateIngredient, deleteIngredient, updateExtraCost, deleteExtraCost));
-    calculate();
+    try {
+        const newIngredient = { name: 'Novo Ingrediente', price: 0, grams: 0, source: 'startup' };
+        await addIngredientDB(newIngredient);
+        await fetchAndPopulateAppData(() => renderCalculator(updateIngredient, deleteIngredient, updateExtraCost, deleteExtraCost));
+        calculate();
+    } catch (error) {
+        console.error("Error adding ingredient:", error);
+    }
 }
 
 async function updateIngredient(id, field, value) {
-    // Note: The UI element itself passes the raw value
-    let updates = { [field]: value };
-    // Handle price and grams parsing here before sending to DB
-    if (field === 'price' || field === 'grams') {
-        updates[field] = parseFloat(value.toString().replace(',', '.')) || 0;
+    // 1. Optimistic Update: Update local appData immediately
+    const item = appData.ingredients.find(i => i.id === id);
+    if (item) {
+        let parsedValue = value;
+        if (field === 'price' || field === 'grams') {
+            parsedValue = parseFloat(value.toString().replace(',', '.')) || 0;
+        }
+        item[field] = parsedValue;
     }
-    await updateIngredientDB(id, updates);
-    // After update, re-fetch data for the item being updated or calculate immediately if local appData is sufficient.
-    // For simplicity, we directly call calculate, assuming appData is updated directly or will be consistent.
-    // If we wanted strict consistency, we would fetchAndPopulateAppData after each update.
+
+    // 2. Recalculate totals immediately to update UI footer
     calculate();
+
+    // 3. Send update to DB in background (no await needed for UI responsiveness, but good to handle errors)
+    try {
+        let updates = { [field]: item[field] };
+        await updateIngredientDB(id, updates);
+    } catch (error) {
+        console.error("Failed to update ingredient in DB:", error);
+        // Optionally revert local change or show error toast
+    }
 }
 
 async function deleteIngredient(id) {
     showConfirm('Excluir Ingrediente?', 'Tem certeza?', async () => {
-        await deleteIngredientDB(id);
-        await fetchAndPopulateAppData(() => {
-            renderCalculator(updateIngredient, deleteIngredient, updateExtraCost, deleteExtraCost);
-            calculate();
-        });
+        // Optimistic UI update could be complex here, so we stick to fetch-render pattern for delete
+        // but let's ensure we catch errors
+        try {
+            await deleteIngredientDB(id);
+            await fetchAndPopulateAppData(() => {
+                renderCalculator(updateIngredient, deleteIngredient, updateExtraCost, deleteExtraCost);
+                calculate();
+            });
+        } catch (error) {
+            console.error("Error deleting ingredient:", error);
+        }
     });
 }
 
 async function addExtraCost() {
-    const newExtraCost = { name: 'Novo Custo', cost: 0, source: 'startup' };
-    await addExtraCostDB(newExtraCost);
-    await fetchAndPopulateAppData(() => renderCalculator(updateIngredient, deleteIngredient, updateExtraCost, deleteExtraCost));
-    calculate();
+    try {
+        const newExtraCost = { name: 'Novo Custo', cost: 0, source: 'startup' };
+        await addExtraCostDB(newExtraCost);
+        await fetchAndPopulateAppData(() => renderCalculator(updateIngredient, deleteIngredient, updateExtraCost, deleteExtraCost));
+        calculate();
+    } catch (error) {
+        console.error("Error adding extra cost:", error);
+    }
 }
 
 async function updateExtraCost(id, field, value) {
-    let updates = { [field]: value };
-    if (field === 'cost') {
-        updates[field] = parseFloat(value.toString().replace(',', '.')) || 0;
+    // 1. Optimistic Update
+    const item = appData.extraCosts.find(i => i.id === id);
+    if (item) {
+        let parsedValue = value;
+        if (field === 'cost') {
+            parsedValue = parseFloat(value.toString().replace(',', '.')) || 0;
+        }
+        item[field] = parsedValue;
     }
-    await updateExtraCostDB(id, updates);
+
+    // 2. Recalculate
     calculate();
+
+    // 3. DB Update
+    try {
+        let updates = { [field]: item[field] };
+        await updateExtraCostDB(id, updates);
+    } catch (error) {
+        console.error("Failed to update extra cost in DB:", error);
+    }
 }
 
 async function deleteExtraCost(id) {
