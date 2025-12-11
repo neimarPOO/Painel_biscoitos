@@ -1,4 +1,4 @@
-import { appData, fetchAndPopulateAppData, deleteMemberDB, updateTaskDB, deleteTaskDB, phasesConfig } from './data.js';
+import { appData, fetchAndPopulateAppData, deleteMember, updateTask, deleteTask, phasesConfig } from './data.js';
 import { showConfirm } from './utils.js';
 
 // ==========================
@@ -16,7 +16,7 @@ export function renderTeam() {
         chip.label = member.name; // Use member.name
         chip.selected = true;
         chip.addEventListener('remove', async () => { // Make async
-            await deleteMemberDB(member.id); // Call delete from DB
+            await deleteMember(member.id); // Call delete from DB
             await fetchAndPopulateAppData(renderTeam); // Re-fetch and render team
         });
         teamList.appendChild(chip);
@@ -80,7 +80,7 @@ export function renderTimeline(openTaskModalCallback) {
 
             taskEl.querySelector('.toggle-status').addEventListener('click', async () => { // Make async
                 const newStatus = (task.status === 'todo') ? 'done' : 'todo';
-                await updateTaskDB(task.id, { status: newStatus }); // Update DB
+                await updateTask(task.id, { status: newStatus }); // Update DB
                 await fetchAndPopulateAppData(() => { // Re-fetch and render
                     renderTimeline(openTaskModalCallback);
                     renderProgress();
@@ -91,7 +91,7 @@ export function renderTimeline(openTaskModalCallback) {
             taskEl.querySelector('.edit-task').addEventListener('click', () => openTaskModalCallback(null, task.id));
             taskEl.querySelector('.delete-task').addEventListener('click', () => {
                 showConfirm("Excluir Tarefa?", "Tem certeza que deseja excluir esta tarefa?", async () => { // Make async
-                    await deleteTaskDB(task.id); // Delete from DB
+                    await deleteTask(task.id); // Delete from DB
                     await fetchAndPopulateAppData(() => { // Re-fetch and render
                         renderTimeline(openTaskModalCallback);
                         renderProgress();
