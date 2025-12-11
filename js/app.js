@@ -162,7 +162,9 @@ function addIngredient() {
 
 function updateIngredient(id, field, value) {
     const item = appData.ingredients.find(i => i.id === id);
-    if (field === 'price' || field === 'grams') value = parseFloat(value) || 0;
+    if (field === 'price' || field === 'grams') {
+        value = parseFloat(value.toString().replace(',', '.')) || 0;
+    }
     item[field] = value;
     saveData(null); // No re-render needed for simple input update, but we need to recalc
     calculate();
@@ -185,7 +187,9 @@ function addExtraCost() {
 
 function updateExtraCost(id, field, value) {
     const item = appData.extraCosts.find(i => i.id === id);
-    if (field === 'cost') value = parseFloat(value) || 0;
+    if (field === 'cost') {
+        value = parseFloat(value.toString().replace(',', '.')) || 0;
+    }
     item[field] = value;
     saveData(null);
     calculate();
@@ -216,8 +220,8 @@ function calculate() {
     });
 
     const totalCost = totalStartup + totalOwn;
-    const quantity = parseFloat(document.getElementById('meta-qtd').value) || 1;
-    const unitsSold = parseFloat(document.getElementById('units-sold').value) || 0;
+    const quantity = parseFloat(document.getElementById('meta-qtd').value.replace(',', '.')) || 1;
+    const unitsSold = parseFloat(document.getElementById('units-sold').value.replace(',', '.')) || 0;
 
     // 1. Custo por unidade
     const unitCost = isFinite(totalCost / quantity) ? totalCost / quantity : 0;
