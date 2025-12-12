@@ -18,7 +18,7 @@
     /* Neobrutalist Variables */
     --border-thickness: 3px;
     --shadow-offset: 4px;
-    --hard-shadow: var(--shadow-offset) var(--shadow-offset) 0px var(--christmas-black);
+    --hard-shadow: var(--shadow-offset: 4px) var(--shadow-offset: 4px) 0px var(--christmas-black);
     --card-bg: #FFFFFF;
     --navbar-bg: var(--christmas-green);
 
@@ -97,7 +97,7 @@ body.dark-theme::before {
     z-index: 100;
     height: 96px;
     box-sizing: border-box;
-    box-shadow: var(--hard-shadow);
+    box-shadow: 4px 4px 0px var(--christmas-black);
 }
 
 .navbar-center {
@@ -171,7 +171,7 @@ md-tabs {
     margin-right: auto;
     border-radius: 0;
     padding: 8px;
-    box-shadow: var(--hard-shadow);
+    box-shadow: 4px 4px 0px var(--christmas-black);
     border: var(--border-thickness) solid var(--christmas-black);
 
     --md-primary-tab-container-color: transparent;
@@ -213,14 +213,14 @@ md-primary-tab:hover {
     padding: 24px;
     margin-bottom: 24px;
     border: var(--border-thickness) solid var(--christmas-black);
-    box-shadow: var(--hard-shadow);
+    box-shadow: 4px 4px 0px var(--christmas-black);
     color: var(--md-sys-color-on-surface);
     transition: transform 0.1s ease;
 }
 
 .card:hover {
     transform: translate(-2px, -2px);
-    box-shadow: calc(var(--shadow-offset) + 2px) calc(var(--shadow-offset) + 2px) 0px var(--christmas-black);
+    box-shadow: 6px 6px 0px var(--christmas-black);
 }
 
 .card-header {
@@ -324,4 +324,135 @@ footer p {
     letter-spacing: 1px;
     font-weight: 700;
     text-transform: uppercase;
+}
+
+/* =========================================
+   RESPONSIVE MOBILE STYLES
+   ========================================= */
+@media (max-width: 768px) {
+    /* Navbar Adjustments */
+    .custom-navbar {
+        height: auto;
+        padding: 12px 16px;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .navbar-center {
+        width: 100%;
+        order: 2; /* Move title below buttons if needed */
+        margin-bottom: 8px;
+    }
+
+    .navbar-title {
+        font-size: 1.5rem; /* Smaller title */
+        white-space: normal; /* Allow wrapping */
+        line-height: 1.1;
+    }
+
+    .navbar-subtitle {
+        display: none; /* Hide subtitle to save space */
+    }
+
+    .navbar-right {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        order: 1; /* Move controls to top */
+    }
+
+    /* Tabs */
+    md-tabs {
+        margin-top: 170px; /* Adjust for taller stacked navbar */
+        width: 95%; /* Full width */
+        overflow-x: auto; /* Scroll if tabs too wide */
+    }
+
+    /* Main Content */
+    .main-content {
+        padding: 12px 8px;
+    }
+
+    /* Grids & Cards */
+    .calculator-grid, 
+    .timeline-grid {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .grid[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important; /* Force single column for result cards */
+    }
+
+    /* Ingredient & Cost Input Rows */
+    /* Transform from flex row to 2-column grid */
+    .input-row.ingredient-row-grid, 
+    .input-row.extracost-row-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr; 
+        gap: 8px;
+        background: transparent;
+        padding: 0;
+        border: none;
+        align-items: center;
+        margin-bottom: 24px; /* More spacing between items */
+        border-bottom: 1px dashed var(--md-sys-color-outline);
+        padding-bottom: 16px;
+    }
+
+    /* Specific field spans */
+    .input-row .input-name {
+        grid-column: 1 / -1; /* Name takes full width */
+        width: 100%;
+    }
+
+    .input-row .input-price,
+    .input-row .input-grams, 
+    .input-row .input-cost {
+        width: 100%; /* Ensure full width in cell */
+    }
+
+    .input-row .input-source {
+        grid-column: 1 / 2;
+    }
+
+    .input-row .btn-delete {
+        grid-column: 2 / 3;
+        justify-self: end;
+        width: 48px;
+        height: 48px;
+    }
+
+    /* Task Items in Timeline */
+    .task-item {
+        flex-wrap: wrap; /* Allow wrapping */
+        padding: 8px;
+        gap: 8px;
+    }
+    
+    .task-item .task-title {
+        flex-grow: 1;
+        width: 100%; /* Force title to own line if crowded */
+        margin-bottom: 4px;
+        margin-left: 8px;
+        /* order: -1;  Optional: put title first */
+    }
+    
+    /* Result Chart Container */
+    .result-card canvas {
+        max-height: 250px;
+    }
+
+    /* Dialogs */
+    md-dialog {
+        width: 90%;
+        max-width: 90%;
+        min-width: 300px;
+    }
+
+    /* Auth Buttons stack */
+    #auth-form {
+        width: 100%;
+    }
 }
