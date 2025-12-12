@@ -82,7 +82,8 @@ function renderApp() {
 }
 
 async function saveSingleSetting(settingKey, inputId) {
-    const value = parseFloat(document.getElementById(inputId).value.replace(',', '.')) || 0;
+    const rawValue = document.getElementById(inputId).value;
+    const value = parseFloat(String(rawValue).replace(',', '.')) || 0;
     appData.settings[settingKey] = value;
     
     // Save to DB
@@ -301,14 +302,14 @@ function calculate() {
     const totalCost = totalStartup + totalOwn;
     
     // Read from DOM, but these should be pre-filled by renderApp
-    const quantity = parseFloat(document.getElementById('meta-qtd').value.replace(',', '.')) || 1;
-    const unitsSold = parseFloat(document.getElementById('units-sold').value.replace(',', '.')) || 0;
+    const quantity = parseFloat(String(document.getElementById('meta-qtd').value).replace(',', '.')) || 1;
+    const unitsSold = parseFloat(String(document.getElementById('units-sold').value).replace(',', '.')) || 0;
 
     // Update appData local state just in case (though save button handles DB)
     if (appData.settings) {
         appData.settings.productionGoal = quantity;
         appData.settings.unitsSold = unitsSold;
-        appData.settings.unitsPerPackage = parseFloat(document.getElementById('units-per-package').value.replace(',', '.')) || 1;
+        appData.settings.unitsPerPackage = parseFloat(String(document.getElementById('units-per-package').value).replace(',', '.')) || 1;
     }
 
     // 1. Custo por unidade
