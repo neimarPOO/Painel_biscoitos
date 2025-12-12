@@ -102,6 +102,18 @@ export async function fetchAndPopulateAppData(renderCallback) {
                 unitsSold: parseFloat(settingsData.units_sold) || 0
             };
         } else {
+            // No settings found. Check if EVERYTHING is empty (new user)
+            const isNewUser = (!members || members.length === 0) &&
+                              (!tasks || tasks.length === 0) &&
+                              (!ingredients || ingredients.length === 0) &&
+                              (!extraCosts || extraCosts.length === 0);
+            
+            if (isNewUser) {
+                await populateDefaultDataForUser(userId);
+                // Recursively call to fetch the newly created data
+                return fetchAndPopulateAppData(renderCallback);
+            }
+
             appData.settings = JSON.parse(JSON.stringify(defaultData.settings));
         }
 
@@ -318,6 +330,53 @@ export async function deleteExtraCost(id) {
         .eq('user_id', user.id);
     if (error) console.error("Error deleting extra cost:", error);
     return !error;
+}
+
+async function populateDefaultDataForUser(userId) {
+    console.log("Populating default data for new user...");
+    const promises = [];
+
+    // Tasks
+    const tasksToInsert = defaultData.tasks.map(t => ({
+        user_id: userId,
+        phase_id: t.phase_id,
+        title: t.title,
+        description: t.description || "",
+        assignee: t.assignee || "",
+        status: t.status || "todo"
+    }));
+    if (tasksToInsert.length > 0) promises.push(supabase.from('tasks').insert(tasksToInsert));
+
+    // Ingredients
+    const ingredientsToInsert = defaultData.ingredients.map(i => ({
+        user_id: userId,
+        name: i.name,
+        price: i.price,
+        grams: i.grams,
+        source: i.source
+    }));
+    if (ingredientsToInsert.length > 0) promises.push(supabase.from('ingredients').insert(ingredientsToInsert));
+
+    // Extra Costs
+    const extraCostsToInsert = defaultData.extraCosts.map(e => ({
+        user_id: userId,
+        name: e.name,
+        cost: e.cost,
+        source: e.source
+    }));
+    if (extraCostsToInsert.length > 0) promises.push(supabase.from('extra_costs').insert(extraCostsToInsert));
+
+    // Settings
+    const settingsToInsert = {
+        user_id: userId,
+        production_goal: defaultData.settings.productionGoal,
+        units_per_package: defaultData.settings.unitsPerPackage,
+        units_sold: defaultData.settings.unitsSold
+    };
+    promises.push(supabase.from('user_settings').insert(settingsToInsert));
+
+    await Promise.all(promises);
+    console.log("Default data populated.");
 }
 
 
